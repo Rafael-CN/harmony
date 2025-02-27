@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import * as SplashScreen from "expo-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Login, Register } from "./screens/auth";
+import Home from "./screens/Home";
 
 export default function App() {
     SplashScreen.preventAutoHideAsync();
@@ -30,6 +31,7 @@ export default function App() {
             <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
                 <Stack.Screen name="Login" component={Login}></Stack.Screen>
                 <Stack.Screen name="Register" component={Register}></Stack.Screen>
+                <Stack.Screen name="Home" component={Home}></Stack.Screen>
             </Stack.Navigator>
         </NavigationContainer>
     );

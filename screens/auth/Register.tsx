@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { Image, ImageBackground, Pressable, StyleSheet } from "react-native";
-import { Input, Button, Span } from "../../components";
+import { Input, Button, Span, Background } from "../../components";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 
@@ -24,7 +24,7 @@ export default function Register() {
     return (
         <>
             <StatusBar style="light"></StatusBar>
-            <ImageBackground source={require("../../assets/background.png")} style={styles.container}>
+            <Background>
                 <Image source={require("../../assets/harmony.png")} />
                 <Input marginTop={25} onChangeText={(value) => updateUser("name", value)} placeholder="Nome do usuário" />
                 <Input marginVertical={25} onChangeText={(value) => updateUser("email", value)} placeholder="Email" />
@@ -35,15 +35,7 @@ export default function Register() {
                         já possui uma <Span bold>conta?</Span>
                     </Span>
                 </Pressable>
-            </ImageBackground>
+            </Background>
         </>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-});
