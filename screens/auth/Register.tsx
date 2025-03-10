@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Image, ImageBackground, Pressable, StyleSheet } from "react-native";
+import { Image, Pressable } from "react-native";
 import { Input, Button, Span, Background } from "../../components";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
