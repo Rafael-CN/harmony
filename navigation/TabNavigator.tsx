@@ -1,22 +1,33 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Pressable, StyleSheet, Modal, View, PressableProps } from "react-native";
+import { Pressable, StyleSheet, Modal, View, PressableProps, GestureResponderEvent } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../theme.json";
 
 import { Home, Chat, Search, Profile } from "../screens/tabs";
 import { useState } from "react";
-import Find from "./Find";
+import { useNavigation } from "@react-navigation/native";
 
-export default function Logged() {
-    const [findVisible, setFindVisible] = useState(false);
+export default function TabNavigator() {
+    const navigation = useNavigation<any>();
 
     const FindButton = () => {
-        const handlePress = () => {
-            setFindVisible(true);
+        const [fingerPosition, setFingerPosition] = useState({ x: 0, y: 0 });
+
+        const handlePressIn = (event: GestureResponderEvent) => {
+            const { pageX, pageY } = event.nativeEvent;
+            setFingerPosition({ x: pageX, y: pageY });
+
+            navigation.navigate("FindNavigator", {
+                screen: "Main",
+                params: {
+                    initialFingerPosition: { x: fingerPosition.x, y: fingerPosition.y },
+                    fromTabPress: true,
+                },
+            });
         };
 
         return (
-            <Pressable style={styles.findButton} onPressIn={handlePress}>
+            <Pressable style={styles.findButton} onPressIn={handlePressIn}>
                 <Ionicons name={"heart"} size={34} color={color.dark} />
             </Pressable>
         );
@@ -73,12 +84,6 @@ export default function Logged() {
                     }}
                 />
             </Tab.Navigator>
-
-            <Modal visible={findVisible} transparent>
-                <Pressable style={{ flex: 1 }} onPress={() => setFindVisible(false)}>
-                    <Find />
-                </Pressable>
-            </Modal>
         </View>
     );
 }

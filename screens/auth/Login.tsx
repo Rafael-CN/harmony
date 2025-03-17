@@ -14,7 +14,7 @@ export default function Login() {
     const [user, setUser] = useState({ name: "", password: "" });
 
     const handleLogin = () => {
-        navigator.navigate("Logged" as never);
+        navigator.navigate("TabNavigator" as never);
     };
 
     return (
