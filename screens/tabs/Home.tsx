@@ -1,37 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, SafeAreaView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
+import { getRandomMusicList } from "../../context/Music";
 import { Span } from "../../components";
+import { Music, useMusic } from "../../services/MusicService";
 
-const SongItem = ({ title = "", artist = "", isLiked = false }) => {
+const SongItem = (music: Music) => {
+    const [liked, setLiked] = useState(false);
+
     return (
         <View style={styles.songItem}>
-            <Image source={require("../../assets/song-cover.png")} style={styles.songCover} defaultSource={require("../../assets/song-cover.png")} />
+            <Image source={{ uri: music.imageUrl }} style={styles.songCover} defaultSource={require("../../assets/song-cover.png")} />
             <View style={styles.songInfo}>
-                <Text style={styles.songTitle}>{title}</Text>
-                <Text style={styles.songArtist}>{artist}</Text>
+                <Span style={styles.songTitle}>{music.name}</Span>
+                <Span style={styles.songArtist}>{music.artist}</Span>
             </View>
-            <TouchableOpacity style={styles.likeButton}>
-                <Ionicons name={isLiked ? "heart" : "heart-outline"} size={24} color={isLiked ? color.light : "#8888AA"} />
+            <TouchableOpacity style={styles.likeButton} onPress={() => setLiked(!liked)}>
+                <Ionicons name={liked ? "heart" : "heart-outline"} size={24} color={liked ? color.light : color.regular} />
             </TouchableOpacity>
         </View>
     );
 };
 
 export default function Home() {
-    const popularSongs = [
-        { id: 1, title: "Believer", artist: "Imagine Dragons", isLiked: false },
-        { id: 2, title: "Believer", artist: "Imagine Dragons", isLiked: false },
-        { id: 3, title: "Believer", artist: "Imagine Dragons", isLiked: false },
-    ];
+    const musicService = useMusic();
 
-    const recentlyLiked = [
-        { id: 1, title: "Believer", artist: "Imagine Dragons", isLiked: true },
-        { id: 2, title: "Believer", artist: "Imagine Dragons", isLiked: true },
-        { id: 3, title: "Believer", artist: "Imagine Dragons", isLiked: true },
-    ];
+    let [randomSongs, setRandomSongs] = useState<Array<Music>>([]);
+    let [likedSongs, setLikedSongs] = useState<Array<Music>>([]);
+
+    useEffect(() => {
+        musicService.getLikedSongs().then((songs) => {
+            setLikedSongs(songs);
+        });
+    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -45,15 +48,12 @@ export default function Home() {
             <ScrollView style={styles.scrollView}>
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Mais populares de hoje</Text>
-                    {popularSongs.map((song) => (
-                        <SongItem key={song.id} title={song.title} artist={song.artist} isLiked={song.isLiked} />
-                    ))}
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Últimas curtidas</Text>
-                    {recentlyLiked.map((song) => (
-                        <SongItem key={song.id} title={song.title} artist={song.artist} isLiked={song.isLiked} />
+                    {likedSongs.map((music, i) => (
+                        <SongItem key={i} {...music} />
                     ))}
                 </View>
             </ScrollView>

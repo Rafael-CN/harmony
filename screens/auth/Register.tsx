@@ -3,22 +3,30 @@ import { Image, Pressable } from "react-native";
 import { Input, Button, Span, Background } from "../../components";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
+import { useAuth } from "../../services/AuthService";
 
 export default function Register() {
     const navigator = useNavigation();
+    const authService = useAuth();
 
     const goToLogin = () => {
         navigator.goBack();
     };
 
-    const [user, setUser] = useState({ name: "", email: "", password: "" });
+    const [user, setUser] = useState({ username: "", password: "" });
 
     const updateUser = (key: string, value: string) => {
         setUser({ ...user, [key]: value });
     };
 
     const handleRegister = () => {
-        alert("Cadastro do usuário: " + user.name + " e email: " + user.email);
+        authService.register(user.username, user.password).then((succeeded) => {
+            if (succeeded) {
+                navigator.navigate("Login" as never);
+            } else {
+                alert("Houve um erro ao cadastrar o usuário");
+            }
+        });
     };
 
     return (
@@ -26,8 +34,7 @@ export default function Register() {
             <StatusBar style="light"></StatusBar>
             <Background>
                 <Image source={require("../../assets/harmony.png")} />
-                <Input marginTop={25} onChangeText={(value) => updateUser("name", value)} placeholder="Nome do usuário" />
-                <Input marginVertical={25} onChangeText={(value) => updateUser("email", value)} placeholder="Email" />
+                <Input marginTop={25} onChangeText={(value) => updateUser("username", value)} placeholder="Nome do usuário" />
                 <Input marginBottom={25} onChangeText={(value) => updateUser("password", value)} placeholder="Senha" />
                 <Button marginBottom={15} onPress={handleRegister} text="Cadastrar" />
                 <Pressable onPress={goToLogin}>

@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     tabBar: {
         backgroundColor: color.dark,
         borderTopWidth: 0,
-        height: 70,
+        height: 110,
     },
     findButton: {
         width: 80,

@@ -3,9 +3,10 @@ import { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import * as SplashScreen from "expo-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Login, Register } from "./screens/auth";
+import { Login, Register, Spotify } from "./screens/auth";
 import TabNavigator from "./navigation/TabNavigator";
 import FindNavigator from "./navigation/FindNavigator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,6 +33,7 @@ export default function App() {
             <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
                 <Stack.Screen name="Login" component={Login}></Stack.Screen>
                 <Stack.Screen name="Register" component={Register}></Stack.Screen>
+                <Stack.Screen name="Spotify" component={Spotify}></Stack.Screen>
                 <Stack.Screen name="TabNavigator" component={TabNavigator}></Stack.Screen>
                 <Stack.Screen name="FindNavigator" component={FindNavigator} options={{ presentation: "transparentModal", animation: "none" }}></Stack.Screen>
             </Stack.Navigator>

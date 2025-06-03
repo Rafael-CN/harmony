@@ -48,21 +48,19 @@ export default function Main() {
     const doButtonAnim = (reverse = false) => {
         return new Promise((resolve) => {
             Animated.parallel([
-                Animated.timing(buttonAnim.gap, {
+                Animated.spring(buttonAnim.gap, {
                     toValue: reverse ? 0 : 75,
-                    duration: 150,
+                    friction: 4.5,
                     useNativeDriver: false,
                 }),
-                Animated.timing(buttonAnim.margin, {
+                Animated.spring(buttonAnim.margin, {
                     toValue: reverse ? 45 : 125,
-                    duration: 150,
+                    friction: 4.5,
                     useNativeDriver: false,
                 }),
             ]).start(resolve);
         });
     };
-
-    const route = useRoute();
 
     useEffect(() => {
         buttonAnim.gap.setValue(0);
@@ -112,8 +110,10 @@ export default function Main() {
     useEffect(() => {
         const unsubscribe = navigation.addListener("beforeRemove", async (e) => {
             e.preventDefault();
-            await doButtonAnim(true);
-            navigation.dispatch(e.data.action);
+            doButtonAnim(true);
+            setTimeout(() => {
+                navigation.dispatch(e.data.action);
+            }, 125);
         });
 
         return () => unsubscribe();
@@ -122,13 +122,13 @@ export default function Main() {
     return (
         <Animated.View style={style.container} {...panResponder.panHandlers}>
             <Animated.View style={[style.description, { opacity: descriptionAnim.opacity }]}>
-                <Span fontSize={28}>
+                <Span style={style.backdrop} fontSize={28}>
                     Encontre novas{" "}
                     <Span fontSize={28} bold>
                         {active.music ? "músicas." : "pessoas."}
                     </Span>
                 </Span>
-                <Span>{active.music ? "que combinem com seu gosto musical" : "que escutam estilos parecidos com seus"}</Span>
+                <Span style={style.backdrop}>{active.music ? "que combinem com seu gosto musical" : "que escutam estilos parecidos com seus"}</Span>
             </Animated.View>
 
             <Animated.View style={[style.buttonGroup, { gap: buttonAnim.gap, marginBottom: buttonAnim.margin }]}>
@@ -148,6 +148,11 @@ const style = StyleSheet.create({
         flex: 1,
         backgroundColor: "#000000aa",
         alignItems: "center",
+    },
+
+    backdrop: {
+        backgroundColor: "#000000aa",
+        borderRadius: 20,
     },
 
     description: {

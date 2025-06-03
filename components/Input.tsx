@@ -1,14 +1,16 @@
 import { StyleSheet, TextInput, TextInputProps } from "react-native";
 import { color } from "../theme.json";
+import { Ref } from "react";
 
 interface InputProps {
     marginBottom?: number;
     marginTop?: number;
     marginVertical?: number;
+    ref?: Ref<TextInput>;
 }
 
 export default function Input({ ...props }: TextInputProps & InputProps) {
-    return <TextInput {...props} style={[props.style, styles.input]} placeholderTextColor={color.light}></TextInput>;
+    return <TextInput {...props} style={[styles.input, props.style]} placeholderTextColor={color.light}></TextInput>;
 }
 
 const styles = StyleSheet.create({
