@@ -29,8 +29,8 @@ export default function Login() {
     };
 
     useEffect(() => {
-        AsyncStorage.getItem("token").then((token) => {
-            if (token) {
+        authService.isLoggedIn().then((isLoggedIn) => {
+            if (isLoggedIn) {
                 navigator.navigate("Spotify" as never);
             }
         });

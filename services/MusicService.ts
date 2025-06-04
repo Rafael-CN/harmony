@@ -27,8 +27,47 @@ async function getLikedSongs(): Promise<Array<Music>> {
     }
 }
 
+async function getTopSongs(): Promise<Array<Music>> {
+    try {
+        const userToken = await AsyncStorage.getItem("token");
+
+        const response = await axios.get(`${API_BASE_URL}/music/top-songs`, {
+            headers: {
+                Authorization: `Bearer ${userToken}`,
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error getting top songs:", error);
+        throw error;
+    }
+}
+
+async function getQuerySongs(query: string, offset: number = 0): Promise<Array<Music>> {
+    try {
+        const userToken = await AsyncStorage.getItem("token");
+
+        const response = await axios.get(`${API_BASE_URL}/music/search`, {
+            headers: {
+                Authorization: `Bearer ${userToken}`,
+            },
+            params: {
+                query,
+                offset,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error getting query songs:", error);
+        throw error;
+    }
+}
+
 export function useMusic() {
     return {
         getLikedSongs,
+        getTopSongs,
+        getQuerySongs,
     };
 }

@@ -1,38 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
-import { getRandomMusicList } from "../../context/Music";
-import { Span } from "../../components";
 import { Music, useMusic } from "../../services/MusicService";
-
-const SongItem = (music: Music) => {
-    const [liked, setLiked] = useState(false);
-
-    return (
-        <View style={styles.songItem}>
-            <Image source={{ uri: music.imageUrl }} style={styles.songCover} defaultSource={require("../../assets/song-cover.png")} />
-            <View style={styles.songInfo}>
-                <Span style={styles.songTitle}>{music.name}</Span>
-                <Span style={styles.songArtist}>{music.artist}</Span>
-            </View>
-            <TouchableOpacity style={styles.likeButton} onPress={() => setLiked(!liked)}>
-                <Ionicons name={liked ? "heart" : "heart-outline"} size={24} color={liked ? color.light : color.regular} />
-            </TouchableOpacity>
-        </View>
-    );
-};
+import { useUser } from "../../services/UserService";
+import SongItem from "../../components/SongItem";
 
 export default function Home() {
     const musicService = useMusic();
+    const userService = useUser();
 
-    let [randomSongs, setRandomSongs] = useState<Array<Music>>([]);
-    let [likedSongs, setLikedSongs] = useState<Array<Music>>([]);
+    const [topSongs, setTopSongs] = useState<Array<Music>>([]);
+    const [likedSongs, setLikedSongs] = useState<Array<Music>>([]);
+
+    const [username, setUsername] = useState("");
 
     useEffect(() => {
+        musicService.getTopSongs().then((songs) => {
+            setTopSongs(songs);
+        });
+
         musicService.getLikedSongs().then((songs) => {
             setLikedSongs(songs);
+        });
+
+        userService.getUsername().then((name) => {
+            setUsername(name);
         });
     }, []);
 
@@ -42,18 +35,21 @@ export default function Home() {
 
             <View style={styles.header}>
                 <Text style={styles.welcomeText}>Bem vindo,</Text>
-                <Text style={styles.userName}>Rafael.</Text>
+                <Text style={styles.userName}>{username}.</Text>
             </View>
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Mais populares de hoje</Text>
+                    <Text style={styles.sectionTitle}>As suas mais escutadas</Text>
+                    {topSongs.map((music, i) => (
+                        <SongItem key={i} music={music} />
+                    ))}
                 </View>
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Últimas curtidas</Text>
                     {likedSongs.map((music, i) => (
-                        <SongItem key={i} {...music} />
+                        <SongItem key={i} music={music} />
                     ))}
                 </View>
             </ScrollView>

@@ -1,91 +1,87 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export interface LoginResponse {
+export interface AuthResponse {
     token: string;
     succeeded: boolean;
 }
 
-async function login(username: string, password: string): Promise<LoginResponse> {
+async function postApi(route: string, data: any, useAuth: boolean = false): Promise<AxiosResponse> {
     try {
-        const response = await axios({
-            method: "post",
-            url: `${API_BASE_URL}/user/login`,
-            data: {
-                username,
-                password,
+        const userToken = await AsyncStorage.getItem("token");
+
+        const response = await axios.post(`${API_BASE_URL}/${route}`, data, {
+            headers: {
+                Authorization: useAuth ? `Bearer ${userToken}` : undefined,
             },
-            validateStatus: (status) => status === 200 || status === 401,
+            validateStatus: (status) => status > 199 && status < 500,
         });
 
-        return {
-            token: response.data.token,
-            succeeded: response.status == 200,
-        };
+        return response;
     } catch (error) {
-        console.error("Error logging in:", error);
+        console.error("Error posting to API:", error);
         throw error;
     }
 }
 
-async function register(username: string, password: string): Promise<boolean> {
+async function getApi(route: string, useAuth: boolean = false): Promise<AxiosResponse> {
     try {
-        const response = await axios.post(`${API_BASE_URL}/user/register`, { username, password });
-        console.log("Register response:", response.data);
+        const userToken = await AsyncStorage.getItem("token");
 
-        return response.status === 200;
+        const response = await axios.get(`${API_BASE_URL}/${route}`, {
+            headers: {
+                Authorization: useAuth ? `Bearer ${userToken}` : undefined,
+            },
+            validateStatus: (status) => status > 199 && status < 500,
+        });
+
+        return response;
     } catch (error) {
-        console.error("Error registering:", error);
+        console.error("Error getting from API:", error);
         throw error;
     }
+}
+
+async function login(username: string, password: string): Promise<AuthResponse> {
+    const response = await postApi("user/login", { username, password });
+
+    return {
+        token: response.data.token,
+        succeeded: response.status == 200,
+    };
+}
+
+async function register(username: string, password: string): Promise<AuthResponse> {
+    const response = await postApi("user/register", { username, password });
+
+    return {
+        token: response.data.token,
+        succeeded: response.status == 200,
+    };
+}
+
+async function isLoggedIn(): Promise<boolean> {
+    const response = await getApi("user/logged-in", true);
+    return response.data.isLoggedIn;
 }
 
 async function isLinkedSpotify(): Promise<boolean> {
-    try {
-        const userToken = await AsyncStorage.getItem("token");
-
-        const response = await axios.get(`${API_BASE_URL}/user/spotify-linked`, {
-            headers: {
-                Authorization: `Bearer ${userToken}`,
-            },
-        });
-        console.log("Is Linked Spotify response:", response.data);
-
-        return response.data.isLinked;
-    } catch (error) {
-        console.error("Error checking if Spotify is linked:", error);
-        throw error;
-    }
+    const response = await getApi("user/spotify-linked", true);
+    return response.data.isLinked;
 }
 
 async function linkSpotify(authCode: string): Promise<boolean> {
-    try {
-        const userToken = await AsyncStorage.getItem("token");
-
-        const response = await axios.post(
-            `${API_BASE_URL}/user/spotify-link`,
-            { authCode },
-            {
-                headers: {
-                    Authorization: `Bearer ${userToken}`,
-                },
-            }
-        );
-        console.log("Link Spotify response:", response.data);
-
-        return response.status === 200;
-    } catch (error) {
-        console.error("Error linking Spotify:", error);
-        throw error;
-    }
+    const response = await postApi("user/spotify-link", { authCode }, true);
+    return response.status === 200;
 }
 
 export function useAuth() {
     return {
         login,
         register,
+        isLoggedIn,
         linkSpotify,
         isLinkedSpotify,
     };

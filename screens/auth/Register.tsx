@@ -1,9 +1,10 @@
 import { StatusBar } from "expo-status-bar";
-import { Image, Pressable } from "react-native";
+import { Image, Pressable, StyleSheet } from "react-native";
 import { Input, Button, Span, Background } from "../../components";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { useAuth } from "../../services/AuthService";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
     const navigator = useNavigation();
@@ -22,7 +23,7 @@ export default function Register() {
     const handleRegister = () => {
         authService.register(user.username, user.password).then((succeeded) => {
             if (succeeded) {
-                navigator.navigate("Login" as never);
+                navigator.navigate("Spotify" as never);
             } else {
                 alert("Houve um erro ao cadastrar o usuário");
             }
@@ -32,17 +33,28 @@ export default function Register() {
     return (
         <>
             <StatusBar style="light"></StatusBar>
-            <Background>
+            <SafeAreaView style={styles.container}>
                 <Image source={require("../../assets/harmony.png")} />
-                <Input marginTop={25} onChangeText={(value) => updateUser("username", value)} placeholder="Nome do usuário" />
+
+                <Input marginVertical={25} onChangeText={(value) => updateUser("username", value)} placeholder="Nome do usuário" />
                 <Input marginBottom={25} onChangeText={(value) => updateUser("password", value)} placeholder="Senha" />
+
                 <Button marginBottom={15} onPress={handleRegister} text="Cadastrar" />
                 <Pressable onPress={goToLogin}>
                     <Span>
                         já possui uma <Span bold>conta?</Span>
                     </Span>
                 </Pressable>
-            </Background>
+            </SafeAreaView>
         </>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#1B1B28",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+});

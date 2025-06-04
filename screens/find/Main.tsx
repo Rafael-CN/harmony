@@ -42,20 +42,20 @@ export default function Main() {
 
     const buttonAnim = {
         gap: useAnimatedValue(0),
-        margin: useAnimatedValue(45),
+        margin: useAnimatedValue(0),
     };
 
     const doButtonAnim = (reverse = false) => {
         return new Promise((resolve) => {
             Animated.parallel([
                 Animated.spring(buttonAnim.gap, {
-                    toValue: reverse ? 0 : 75,
-                    friction: 4.5,
+                    toValue: reverse ? 0 : 50,
+                    friction: 5,
                     useNativeDriver: false,
                 }),
                 Animated.spring(buttonAnim.margin, {
-                    toValue: reverse ? 45 : 125,
-                    friction: 4.5,
+                    toValue: reverse ? 75 : 150,
+                    friction: 5,
                     useNativeDriver: false,
                 }),
             ]).start(resolve);
@@ -64,7 +64,7 @@ export default function Main() {
 
     useEffect(() => {
         buttonAnim.gap.setValue(0);
-        buttonAnim.margin.setValue(45);
+        buttonAnim.margin.setValue(75);
 
         doButtonAnim();
 
