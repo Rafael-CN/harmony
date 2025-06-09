@@ -6,12 +6,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Login, Register, Spotify } from "./screens/auth";
 import TabNavigator from "./navigation/TabNavigator";
 import FindNavigator from "./navigation/FindNavigator";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
     const [loaded, error] = useFonts({
+        "Nexa-Bold": require("./assets/fonts/Nexa-Bold.otf"),
+        "Nexa-Regular": require("./assets/fonts/Nexa-Regular.otf"),
+        "Nexa-Light": require("./assets/fonts/Nexa-Light.otf"),
         "Nexa-Heavy": require("./assets/fonts/Nexa-Heavy.ttf"),
         "Nexa-ExtraLight": require("./assets/fonts/Nexa-ExtraLight.ttf"),
     });

@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
 import { Music, useMusic } from "../../services/MusicService";
 import SongItem from "../../components/SongItem";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Search() {
     const textColor = color.extraLight;
@@ -41,22 +42,24 @@ export default function Search() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.searchSection}>
-                <Ionicons name="search" size={24} color={textColor}></Ionicons>
-                <TextInput ref={inputRef} style={styles.search} onChangeText={setSearch} onSubmitEditing={handleSearch} placeholderTextColor={textColor} placeholder="Digite para pesquisar..." />
-            </View>
+        <LinearGradient colors={["#000000", color.extraDark]} style={{ flex: 1 }}>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.searchSection}>
+                    <Ionicons name="search-outline" size={24} color={textColor}></Ionicons>
+                    <TextInput ref={inputRef} style={styles.search} onChangeText={setSearch} onSubmitEditing={handleSearch} placeholderTextColor={textColor} placeholder="Digite para pesquisar..." />
+                </View>
 
-            <View style={styles.searchResultsContainer}>
-                {querySongs && (
-                    <ScrollView style={styles.searchResults} onScroll={handleScroll}>
-                        {querySongs.map((music, i) => (
-                            <SongItem key={i} music={music} />
-                        ))}
-                    </ScrollView>
-                )}
-            </View>
-        </SafeAreaView>
+                <View style={styles.searchResultsContainer}>
+                    {querySongs && (
+                        <ScrollView style={styles.searchResults} onScroll={handleScroll}>
+                            {querySongs.map((music, i) => (
+                                <SongItem key={i} music={music} />
+                            ))}
+                        </ScrollView>
+                    )}
+                </View>
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 
@@ -64,25 +67,25 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        backgroundColor: color.extraDark,
     },
 
     searchSection: {
-        marginTop: "5%",
+        marginTop: 20,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: color.dark,
-        paddingVertical: "3%",
-        paddingHorizontal: "4%",
-        borderRadius: 10,
+        backgroundColor: color.extraDark,
+        borderRadius: 15,
         borderWidth: 1,
         borderColor: color.regular,
     },
 
     search: {
-        width: "75%",
-        marginLeft: "2%",
+        width: "80%",
+        marginLeft: 5,
         color: color.extraLight,
+        fontFamily: "Nexa-Regular",
     },
 
     searchResultsContainer: {
