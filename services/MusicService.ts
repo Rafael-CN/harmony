@@ -5,22 +5,22 @@ const { post, get } = useAxios();
 export interface Music {
     name: string;
     artist: string;
-
+    linkUrl: string;
     imageUrl: string;
 }
 
-async function getLikedSongs(): Promise<Array<Music>> {
-    const response = await get(`music/liked-songs`, true);
+async function getLikedSongs(limit: number = 5): Promise<Array<Music>> {
+    const response = await get(`spotify/lastLiked?limit=${limit}`, true);
     return response.data;
 }
 
 async function getTopSongs(): Promise<Array<Music>> {
-    const response = await get(`music/top-songs`, true);
+    const response = await get("spotify/topSongs", true);
     return response.data;
 }
 
 async function getQuerySongs(query: string, offset: number = 0): Promise<Array<Music>> {
-    const response = await get(`music/query-songs?query=${query}&offset=${offset}`, true);
+    const response = await get(`spotify/search?query=${query}&offset=${offset}`, true);
     return response.data;
 }
 

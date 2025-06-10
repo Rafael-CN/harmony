@@ -4,10 +4,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { color } from "../../theme.json";
-import React from "react";
-import SongItem from "../../components/SongItem";
+import React, { useEffect, useState } from "react";
 import * as Color from "react-native-color-toolkit";
 import { useNavigation } from "@react-navigation/native";
+import { Music, useMusic } from "../../services/MusicService";
+import * as Linking from "expo-linking";
+import { useUser } from "../../services/UserService";
 
 const StatusBox = ({ title, icon, color, number }: { title: string; icon: keyof typeof Ionicons.glyphMap; color: string; number: number }) => {
     const styles = StyleSheet.create({
@@ -59,8 +61,6 @@ const StatusBox = ({ title, icon, color, number }: { title: string; icon: keyof 
 };
 
 const Header = () => {
-    const navigator = useNavigation();
-
     const styles = StyleSheet.create({
         header: {
             flexDirection: "row",
@@ -116,13 +116,25 @@ const Header = () => {
         },
     });
 
+    const navigator = useNavigation();
+
+    const userService = useUser();
+
+    const [username, setUsername] = useState("");
+    const [displayName, setDisplayName] = useState("");
+
+    useEffect(() => {
+        userService.getUsername().then(setUsername);
+        userService.getDisplayName().then(setDisplayName);
+    }, []);
+
     return (
         <LinearGradient colors={["#1B1B28", "#000000"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.header}>
             <View style={styles.headerUser}>
                 <Image style={styles.userImage} source={require("../../assets/users/1.png")} />
                 <View style={styles.headerUserInfo}>
-                    <Text style={styles.userText}>Bem vindo, Rafael</Text>
-                    <Text style={styles.userName}>@rafael</Text>
+                    <Text style={styles.userText}>Bem vindo, {displayName}</Text>
+                    <Text style={styles.userName}>@{username}</Text>
                 </View>
             </View>
 
@@ -138,15 +150,14 @@ const Header = () => {
     );
 };
 
-const LikedSong = () => {
+const LikedMusic = ({ music }: { music: Music }) => {
     const styles = StyleSheet.create({
         songContainer: {
             width: "100%",
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            paddingVertical: 15,
-            paddingHorizontal: 10,
+            padding: 15,
             backgroundColor: color.extraDark,
             borderRadius: 10,
             marginBottom: 20,
@@ -195,14 +206,14 @@ const LikedSong = () => {
     return (
         <View style={styles.songContainer}>
             <View style={styles.songInfoContainer}>
-                <Image source={require("../../assets/song-cover.png")} style={styles.songCover} />
+                <Image source={{ uri: music.imageUrl }} style={styles.songCover} />
                 <View style={styles.songInfo}>
-                    <Text style={styles.songTitle}>Believer</Text>
-                    <Text style={styles.songArtist}>Imagine Dragons</Text>
+                    <Text style={styles.songTitle}>{music.name}</Text>
+                    <Text style={styles.songArtist}>{music.artist}</Text>
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.songLink}>
+            <TouchableOpacity style={styles.songLink} onPress={() => Linking.openURL(music.linkUrl)}>
                 <Ionicons name="open-outline" style={styles.songLinkIcon} />
             </TouchableOpacity>
         </View>
@@ -210,26 +221,35 @@ const LikedSong = () => {
 };
 
 export default function Home() {
+    const musicService = useMusic();
+
+    const [likedSongs, setLikedSongs] = useState<Array<Music>>([]);
+
+    useEffect(() => {
+        musicService.getLikedSongs(2).then(setLikedSongs);
+    }, []);
+
     return (
-        <LinearGradient colors={["#000000", color.extraDark]} style={{ flex: 1 }}>
+        <LinearGradient colors={["#000000", color.extraDark]} style={styles.container}>
             <SafeAreaView style={styles.container}>
                 <StatusBar style="light" />
 
                 <Header />
 
                 <View style={styles.statusGroup}>
-                    <StatusBox title="Músicas curtidas" icon="heart-outline" color="#d6677f" number={572} />
-                    <StatusBox title="Amigos" icon="people-outline" color="#4F518C" number={25} />
+                    <StatusBox title="Músicas curtidas" icon="heart-outline" color="#d6677f" number={0} />
+                    <StatusBox title="Amigos" icon="people-outline" color="#4F518C" number={0} />
                 </View>
 
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Curtidas recentes</Text>
-                        <Text style={styles.sectionLink}>Ver todas</Text>
+                        <TouchableOpacity>
+                            <Text style={styles.sectionLink}>Ver todas</Text>
+                        </TouchableOpacity>
                     </View>
 
-                    <LikedSong />
-                    <LikedSong />
+                    {likedSongs && likedSongs.map((music, i) => <LikedMusic music={music} key={music.name} />)}
                 </View>
             </SafeAreaView>
         </LinearGradient>
