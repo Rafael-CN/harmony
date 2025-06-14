@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Harmony.Controllers.DTOs
+namespace Harmony.Controllers.DTOs.User
 {
     public class RegisterDTO
     {

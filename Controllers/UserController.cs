@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 using Harmony.Services.Interfaces;
-using Harmony.Controllers.DTOs;
+using Harmony.Controllers.DTOs.User;
 using Harmony.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;

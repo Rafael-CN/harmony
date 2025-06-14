@@ -7,5 +7,7 @@ namespace Harmony.Services.DTOs.Spotify
         public required string Name { get; set; }
 
         public required string Uri { get; set; }
+
+        public required List<string> Genres { get; set; }
     }
 }

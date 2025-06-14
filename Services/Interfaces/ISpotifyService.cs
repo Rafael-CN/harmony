@@ -11,8 +11,13 @@ namespace Harmony.Services.Interfaces
 
         Task<List<Music>?> GetLastLikedSongs(User user, int limit = 5);
         Task<List<Music>?> GetQuerySongs(User user, string query, int offset = 0);
-        Task<List<Music>?> GetTopSongs(User user, int limit = 5);
+
         Task<Music?> GetSong(User user, string id);
         Task<List<Music>?> GetSongs(User user, IEnumerable<string> ids);
+
+        Task<List<Music>?> GetTopSongs(User user, int limit = 5);
+        Task<List<Artist>?> GetTopArtists(User user, int limit = 5);
+
+        Task<int?> GetLikedSongsCount(User user);
     }
 }

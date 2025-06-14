@@ -6,8 +6,6 @@ using Harmony.Services.Interfaces;
 using Harmony.Services.Models;
 using Harmony.Services.DTOs.Spotify;
 using Harmony.Models;
-using Harmony.Middlewares;
-using System.Collections.Immutable;
 
 namespace Harmony.Services
 {
@@ -25,6 +23,8 @@ namespace Harmony.Services
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
         };
+
+        #region Helpers
 
         private string GetBasicHeader()
         {
@@ -109,20 +109,7 @@ namespace Harmony.Services
             }
         }
 
-        public async Task<List<string>?> GetTopArtists(User user, int limit = 5)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync($"me/top/artists?limit={limit}");
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            var pagedData = JsonSerializer.Deserialize<Page<Artist>>(json, _jsonSerializerOptions);
-            if (pagedData == null) return [];
-
-            return pagedData.Items.Select(i => i.Name).ToList();
-        }
+        #endregion
 
         public async Task<Music?> GetSong(User user, string id)
         {
@@ -219,6 +206,22 @@ namespace Harmony.Services
             }
         }
 
+        public async Task<int?> GetLikedSongsCount(User user)
+        {
+            var client = await ConfigHttpClient(user);
+            if (client == null) return null;
+
+            var response = await client.GetAsync("me/tracks?limit=1");
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var pagedData = JsonSerializer.Deserialize<Page<Like>>(json, _jsonSerializerOptions);
+
+            return pagedData?.Total;
+        }
+
+        #region Top items
+
         public async Task<List<Music>?> GetTopSongs(User user, int limit = 5)
         {
             var client = await ConfigHttpClient(user);
@@ -239,6 +242,23 @@ namespace Harmony.Services
                 return null;
             }
         }
+
+        public async Task<List<Artist>?> GetTopArtists(User user, int limit = 5)
+        {
+            var client = await ConfigHttpClient(user);
+            if (client == null) return null;
+
+            var response = await client.GetAsync($"me/top/artists?limit={limit}");
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var pagedData = JsonSerializer.Deserialize<Page<Artist>>(json, _jsonSerializerOptions);
+            if (pagedData == null) return [];
+
+            return pagedData.Items;
+        }
+
+        #endregion
 
         private static List<Music> TracksToMusics(List<Track> tracks)
         {

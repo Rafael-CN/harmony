@@ -10,7 +10,14 @@ namespace Harmony.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SpotifyController(UserManager<User> userManager, ISpotifyService spotifyService, IReccoService reccoService) : ControllerBase
+    [Authorize]
+    public class MusicController(
+
+        UserManager<User> userManager,
+        ISpotifyService spotifyService,
+        IReccoService reccoService
+
+    ) : ControllerBase
     {
 
         private async Task<User?> GetUser()

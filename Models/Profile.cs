@@ -2,8 +2,9 @@ namespace Harmony.Models
 {
     public class Profile
     {
-        public Profile() {}
-        public Profile(string displayName) { 
+        public Profile() { }
+        public Profile(string displayName)
+        {
             DisplayName = displayName;
         }
 

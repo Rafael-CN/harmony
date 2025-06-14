@@ -65,6 +65,7 @@ builder.Services.AddHttpClient("SpotifyApi", client =>
 builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<ISpotifyService, SpotifyService>();
 builder.Services.AddScoped<IReccoService, ReccoService>();
+builder.Services.AddScoped<IStatusService, StatusService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
