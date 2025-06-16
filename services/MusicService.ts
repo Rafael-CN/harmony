@@ -3,6 +3,7 @@ import { useAxios } from "./AxiosService";
 const { post, get } = useAxios();
 
 export interface Music {
+    id: string;
     name: string;
     artist: string;
     linkUrl: string;
@@ -10,17 +11,22 @@ export interface Music {
 }
 
 async function getLikedSongs(limit: number = 5): Promise<Array<Music>> {
-    const response = await get(`spotify/lastLiked?limit=${limit}`, true);
+    const response = await get(`music/lastLiked?limit=${limit}`, true);
     return response.data;
 }
 
 async function getTopSongs(): Promise<Array<Music>> {
-    const response = await get("spotify/topSongs", true);
+    const response = await get("music/top/songs", true);
     return response.data;
 }
 
 async function getQuerySongs(query: string, offset: number = 0): Promise<Array<Music>> {
-    const response = await get(`spotify/search?query=${query}&offset=${offset}`, true);
+    const response = await get(`music/search?query=${query}&offset=${offset}`, true);
+    return response.data;
+}
+
+async function getRecommendedSongs(seeds: Array<string>, limit: number = 5): Promise<Array<Music>> {
+    const response = await get(`music/recommendations?seeds=${seeds.join(",")}&limit=${limit}`, true);
     return response.data;
 }
 
@@ -29,5 +35,6 @@ export function useMusic() {
         getLikedSongs,
         getTopSongs,
         getQuerySongs,
+        getRecommendedSongs,
     };
 }

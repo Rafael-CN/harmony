@@ -38,6 +38,14 @@ export default function TabNavigator() {
                 />
 
                 <Tab.Screen
+                    name="asd"
+                    component={Chat}
+                    options={{
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "heart" : "heart-outline"} size={24} color={color} />,
+                    }}
+                />
+
+                <Tab.Screen
                     name="Chat"
                     component={Chat}
                     options={{

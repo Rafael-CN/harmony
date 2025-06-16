@@ -9,7 +9,7 @@ import * as Color from "react-native-color-toolkit";
 import { useNavigation } from "@react-navigation/native";
 import { Music, useMusic } from "../../services/MusicService";
 import * as Linking from "expo-linking";
-import { useUser } from "../../services/UserService";
+import { ProfileData, useUser } from "../../services/UserService";
 
 const StatusBox = ({ title, icon, color, number }: { title: string; icon: keyof typeof Ionicons.glyphMap; color: string; number: number }) => {
     const styles = StyleSheet.create({
@@ -60,7 +60,7 @@ const StatusBox = ({ title, icon, color, number }: { title: string; icon: keyof 
     );
 };
 
-const Header = () => {
+const Header = ({ profile }: { profile: ProfileData | null }) => {
     const styles = StyleSheet.create({
         header: {
             flexDirection: "row",
@@ -119,13 +119,10 @@ const Header = () => {
     const navigator = useNavigation();
 
     const userService = useUser();
-
     const [username, setUsername] = useState("");
-    const [displayName, setDisplayName] = useState("");
 
     useEffect(() => {
         userService.getUsername().then(setUsername);
-        userService.getDisplayName().then(setDisplayName);
     }, []);
 
     return (
@@ -133,7 +130,7 @@ const Header = () => {
             <View style={styles.headerUser}>
                 <Image style={styles.userImage} source={require("../../assets/users/1.png")} />
                 <View style={styles.headerUserInfo}>
-                    <Text style={styles.userText}>Bem vindo, {displayName}</Text>
+                    <Text style={styles.userText}>Bem vindo, {profile?.displayName}</Text>
                     <Text style={styles.userName}>@{username}</Text>
                 </View>
             </View>
@@ -182,6 +179,7 @@ const LikedMusic = ({ music }: { music: Music }) => {
             color: color.extraLight,
             fontSize: 14,
             fontFamily: "Nexa-Heavy",
+            width: 200,
         },
 
         songArtist: {
@@ -208,7 +206,9 @@ const LikedMusic = ({ music }: { music: Music }) => {
             <View style={styles.songInfoContainer}>
                 <Image source={{ uri: music.imageUrl }} style={styles.songCover} />
                 <View style={styles.songInfo}>
-                    <Text style={styles.songTitle}>{music.name}</Text>
+                    <Text style={styles.songTitle} numberOfLines={1}>
+                        {music.name}
+                    </Text>
                     <Text style={styles.songArtist}>{music.artist}</Text>
                 </View>
             </View>
@@ -224,9 +224,19 @@ export default function Home() {
     const musicService = useMusic();
 
     const [likedSongs, setLikedSongs] = useState<Array<Music>>([]);
+    const [reccomendedSongs, setRecommendedSongs] = useState<Array<Music>>([]);
+
+    const userService = useUser();
+
+    const [profile, setProfile] = useState<ProfileData | null>(null);
 
     useEffect(() => {
-        musicService.getLikedSongs(2).then(setLikedSongs);
+        musicService.getLikedSongs(2).then((songs) => {
+            setLikedSongs(songs);
+            musicService.getRecommendedSongs(songs.map((s) => s.id)).then(setRecommendedSongs);
+        });
+
+        userService.getProfile().then(setProfile);
     }, []);
 
     return (
@@ -234,10 +244,10 @@ export default function Home() {
             <SafeAreaView style={styles.container}>
                 <StatusBar style="light" />
 
-                <Header />
+                <Header profile={profile} />
 
                 <View style={styles.statusGroup}>
-                    <StatusBox title="Músicas curtidas" icon="heart-outline" color="#d6677f" number={0} />
+                    <StatusBox title="Músicas curtidas" icon="heart-outline" color="#d6677f" number={profile?.status.likedCount || 0} />
                     <StatusBox title="Amigos" icon="people-outline" color="#4F518C" number={0} />
                 </View>
 
@@ -250,6 +260,14 @@ export default function Home() {
                     </View>
 
                     {likedSongs && likedSongs.map((music, i) => <LikedMusic music={music} key={music.name} />)}
+                </View>
+
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Músicas recomendadas</Text>
+                    </View>
+
+                    <ScrollView>{reccomendedSongs && reccomendedSongs.map((music, i) => <LikedMusic music={music} key={music.name} />)}</ScrollView>
                 </View>
             </SafeAreaView>
         </LinearGradient>
