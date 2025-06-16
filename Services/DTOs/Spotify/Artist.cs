@@ -8,6 +8,6 @@ namespace Harmony.Services.DTOs.Spotify
 
         public required string Uri { get; set; }
 
-        public required List<string> Genres { get; set; }
+        public List<string> Genres { get; set; } = new List<string>();
     }
 }

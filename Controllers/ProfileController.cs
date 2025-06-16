@@ -14,7 +14,8 @@ namespace Harmony.Controllers
     public class ProfileController(
 
         UserManager<User> userManager,
-        IStatusService statusService
+        IStatusService statusService,
+        IPhotoService photoService
 
     ) : ControllerBase
     {
@@ -73,7 +74,6 @@ namespace Harmony.Controllers
             user.Profile ??= new Profile();
             user.Profile.DisplayName = model.DisplayName ?? user.Profile.DisplayName;
             user.Profile.Bio = model.Bio ?? user.Profile.Bio;
-            user.Profile.ProfilePictureUrl = model.ProfilePictureUrl ?? user.Profile.ProfilePictureUrl;
 
             var result = await userManager.UpdateAsync(user);
 
@@ -83,6 +83,31 @@ namespace Harmony.Controllers
             }
 
             return BadRequest(new { Message = "Não foi possível atualizar o perfil" });
+        }
+
+
+        [HttpPost("me/photo")]
+        public async Task<IActionResult> AddProfilePhoto([FromForm] IFormFile file)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            if (file == null || file.Length <= 0) return BadRequest(new { Message = "Nenhum arquivo enviado." });
+
+            var uploadResult = await photoService.AddPhotoAsync(file);
+            if (uploadResult.Error != null) return BadRequest(new { Message = "Houve um erro ao salvar a foto" });
+
+            user.Profile ??= new Profile(user.UserName!);
+            user.Profile.ProfilePictureUrl = uploadResult.SecureUrl.ToString();
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { url = user.Profile.ProfilePictureUrl });
+            }
+
+            return BadRequest(new { Message = "Não foi possível salvar a foto de perfil." });
         }
     }
 }
