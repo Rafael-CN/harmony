@@ -65,7 +65,7 @@ const LikedMusic = ({ music }: { music: Music }) => {
     return (
         <View style={styles.songContainer}>
             <View style={styles.songInfoContainer}>
-                <Image source={{ uri: music.imageUrl }} style={styles.songCover} />
+                <Image source={{ uri: music.imageUrl }} style={styles.songCover} priority={"high"} />
                 <View style={styles.songInfo}>
                     <Text style={styles.songTitle} numberOfLines={1}>
                         {music.name}

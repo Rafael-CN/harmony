@@ -10,6 +10,13 @@ export interface Music {
     imageUrl: string;
 }
 
+export interface Artist {
+    id: string;
+    name: string;
+    imageUrl: string;
+    linkUrl: string;
+}
+
 async function getLikedSongs(limit: number = 5): Promise<Array<Music>> {
     const response = await get(`music/lastLiked?limit=${limit}`, true);
     return response.data;
@@ -30,11 +37,17 @@ async function getRecommendedSongs(seeds: Array<string>, limit: number = 5): Pro
     return response.data;
 }
 
+async function getArtist(artistId: string): Promise<Artist> {
+    const response = await get(`music/artist/${artistId}`, true);
+    return response.data;
+}
+
 export function useMusic() {
     return {
         getLikedSongs,
         getTopSongs,
         getQuerySongs,
         getRecommendedSongs,
+        getArtist,
     };
 }

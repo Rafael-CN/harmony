@@ -1,113 +1,15 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ProfileData, useUser } from "../../services/UserService";
 import { useEffect, useState } from "react";
-import { BlurView } from "expo-blur";
-import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
-
-const ProfileEditModal = ({ profile, visible, setVisible, onSave }: { profile: ProfileData | null; visible: boolean; setVisible: (visible: boolean) => void; onSave: (editedData: ProfileData) => void }) => {
-    const userService = useUser();
-
-    const [editedProfile, setEditedProfile] = useState<ProfileData | null>(null);
-
-    const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
-
-    useEffect(() => {
-        if (visible && profile) {
-            setEditedProfile({ ...profile! });
-            setSelectedImageUri(null);
-        }
-    }, [visible, profile]);
-
-    const pickImage = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-            alert("Permissão de acesso à galeria negada.");
-            return;
-        }
-
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.7,
-        });
-
-        if (!result.canceled) {
-            setSelectedImageUri(result.assets[0].uri);
-        }
-    };
-
-    const handleSaveChanges = async () => {
-        if (!editedProfile) return;
-        setIsSaving(true);
-
-        let finalProfileData = { ...editedProfile };
-
-        if (selectedImageUri) {
-            const newImageUrl = await userService.updateProfilePicture(selectedImageUri);
-            if (newImageUrl) {
-                finalProfileData.profilePictureUrl = newImageUrl;
-            } else {
-                alert("Erro ao atualizar a imagem de perfil.");
-                setIsSaving(false);
-                return;
-            }
-        }
-
-        const textFieldsUpdated = await userService.updateProfile(editedProfile.displayName, editedProfile.bio);
-        if (textFieldsUpdated) {
-            onSave(finalProfileData);
-        } else {
-            alert("Não foi possível atualizar os dados do perfil.");
-        }
-
-        setIsSaving(false);
-    };
-
-    const imageSource = selectedImageUri ? { uri: selectedImageUri } : editedProfile?.profilePictureUrl ? { uri: editedProfile.profilePictureUrl } : require("../../assets/users/1.png");
-
-    return (
-        <Modal transparent visible={visible} animationType="fade" onRequestClose={() => setVisible(false)}>
-            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-                <BlurView intensity={5} tint="dark" style={styles.blurContainer} experimentalBlurMethod="dimezisBlurView">
-                    <View style={styles.modal}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Editar perfil</Text>
-
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setVisible(false)}>
-                                <Ionicons name="close" size={24} color={color.light} />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.profilePictureContainer}>
-                            <TouchableOpacity onPress={pickImage} disabled={isSaving}>
-                                <Image source={imageSource} style={styles.profilePicture} />
-                                <View style={styles.profilePictureOverlay}>
-                                    <Ionicons name="camera" size={24} color={color.extraLight} />
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-
-                        <TextInput style={styles.modalInput} placeholder="Nome de exibição" placeholderTextColor={color.light} value={editedProfile?.displayName} onChangeText={(value) => setEditedProfile({ ...editedProfile!, displayName: value })} />
-                        <TextInput style={styles.modalInput} placeholder="Bio" multiline placeholderTextColor={color.light} value={editedProfile?.bio} onChangeText={(value) => setEditedProfile({ ...editedProfile!, bio: value })} />
-
-                        <TouchableOpacity onPress={handleSaveChanges} disabled={isSaving}>
-                            <LinearGradient colors={isSaving ? [color.dark, color.dark] : [color.regular, color.dark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.modalButton}>
-                                {isSaving ? <ActivityIndicator color={color.extraLight} /> : <Text style={styles.modalButtonText}>Salvar</Text>}
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
-                </BlurView>
-            </KeyboardAvoidingView>
-        </Modal>
-    );
-};
+import { ProfileEditModal } from "../../components/profile";
+import { Artist, useMusic } from "../../services/MusicService";
+import ArtistListItem from "../../components/profile/ArtistListItem";
+import GenreTag from "../../components/profile/GenreTag";
 
 const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit: () => void }) => {
     const styles = StyleSheet.create({
@@ -198,9 +100,12 @@ const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit:
 
 export default function Profile() {
     const userService = useUser();
+    const musicService = useMusic();
 
     const [visible, setVisible] = useState(false);
     const [profile, setProfile] = useState<ProfileData | null>(null);
+
+    const [topArtists, setTopArtists] = useState<Array<Artist>>([]);
 
     useEffect(() => {
         userService.getProfile().then(setProfile);
@@ -211,6 +116,16 @@ export default function Profile() {
         setVisible(false);
         console.log("Perfil salvo com sucesso!");
     };
+
+    useEffect(() => {
+        if (profile) {
+            let tasks = profile.status.topArtists.slice(0, 3).map((artistId) => {
+                return musicService.getArtist(artistId);
+            });
+
+            Promise.all(tasks).then(setTopArtists);
+        }
+    }, [profile]);
 
     return (
         <LinearGradient colors={["#000000", color.extraDark]} style={styles.container}>
@@ -225,23 +140,21 @@ export default function Profile() {
                     </View>
 
                     <View style={styles.statsContainer}>
-                        <Text style={styles.statsValue}>10</Text>
+                        <Text style={styles.statsValue}>0</Text>
                         <Text style={styles.statsTitle}>Seguidores</Text>
                     </View>
 
                     <View style={styles.statsContainer}>
-                        <Text style={styles.statsValue}>27</Text>
+                        <Text style={styles.statsValue}>0</Text>
                         <Text style={styles.statsTitle}>Seguindo</Text>
                     </View>
                 </View>
 
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Gêneros favoritos</Text>
-                    <View style={styles.genres}>
+                    <View style={styles.genresContainer}>
                         {profile?.status.topGenres.slice(0, 3).map((genre, i) => (
-                            <Text key={i} style={styles.genre}>
-                                {genre.charAt(0).toUpperCase() + genre.slice(1)}
-                            </Text>
+                            <GenreTag key={i} genre={genre} />
                         ))}
                     </View>
                 </View>
@@ -249,13 +162,7 @@ export default function Profile() {
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Artistas favoritos</Text>
 
-                    <View style={styles.genres}>
-                        {profile?.status.topArtists.slice(0, 3).map((genre, i) => (
-                            <Text key={i} style={styles.genre}>
-                                {genre.charAt(0).toUpperCase() + genre.slice(1)}
-                            </Text>
-                        ))}
-                    </View>
+                    <View style={styles.artistListContainer}>{topArtists.length > 0 ? topArtists.map((artist, i) => <ArtistListItem key={artist.id} artist={artist} rank={i + 1} />) : <Text style={styles.emptyStateText}>Ouça mais músicas para ver seus artistas favoritos aqui!</Text>}</View>
                 </View>
             </SafeAreaView>
         </LinearGradient>
@@ -312,101 +219,23 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 
-    genres: {
+    genresContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 10,
+        gap: 12,
         marginTop: 10,
     },
 
-    genre: {
-        backgroundColor: color.dark,
-        color: color.light,
-        paddingHorizontal: 15,
-        paddingVertical: 5,
-        borderRadius: 10,
-        fontSize: 14,
-        fontFamily: "Nexa-Bold",
-    },
-
-    blurContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
-    modal: {
-        width: "90%",
-        backgroundColor: color.extraDark,
-        borderRadius: 20,
-        padding: 20,
-        borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.1)",
-    },
-
-    modalHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-
-    modalTitle: {
-        color: color.extraLight,
-        fontSize: 20,
-        fontFamily: "Nexa-Bold",
-    },
-
-    closeButton: {
-        padding: 5,
-    },
-
-    modalInput: {
-        backgroundColor: color.dark,
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        fontSize: 16,
-        fontFamily: "Nexa-Light",
-        color: color.extraLight,
-        borderWidth: 1,
-        borderColor: color.light,
-        marginBottom: 20,
-    },
-
-    modalButton: {
+    artistListContainer: {
+        marginTop: 10,
         width: "100%",
-        padding: 15,
-        borderRadius: 10,
-        alignItems: "center",
     },
 
-    modalButtonText: {
-        color: color.extraLight,
-        fontSize: 16,
-        fontFamily: "Nexa-Bold",
+    emptyStateText: {
+        color: color.light,
+        fontFamily: "Nexa-Light",
+        fontSize: 14,
         textAlign: "center",
-    },
-
-    profilePictureContainer: {
-        alignItems: "center",
-        marginBottom: 20,
-    },
-
-    profilePicture: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        borderWidth: 2,
-        borderColor: color.regular,
-    },
-    profilePictureOverlay: {
-        position: "absolute",
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: "rgba(0,0,0,0.4)",
-        justifyContent: "center",
-        alignItems: "center",
+        opacity: 0.7,
     },
 });

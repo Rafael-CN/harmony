@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Music, useMusic } from "../../services/MusicService";
 import * as Linking from "expo-linking";
 import { ProfileData, useUser } from "../../services/UserService";
+import { Image } from "expo-image";
 
 const StatusBox = ({ title, icon, color, number }: { title: string; icon: keyof typeof Ionicons.glyphMap; color: string; number: number }) => {
     const styles = StyleSheet.create({
@@ -125,10 +126,12 @@ const Header = ({ profile }: { profile: ProfileData | null }) => {
         userService.getUsername().then(setUsername);
     }, []);
 
+    const imageSource = profile?.profilePictureUrl ? { uri: profile.profilePictureUrl } : require("../../assets/users/1.png");
+
     return (
         <LinearGradient colors={["#1B1B28", "#000000"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.header}>
             <View style={styles.headerUser}>
-                <Image style={styles.userImage} source={require("../../assets/users/1.png")} />
+                <Image style={styles.userImage} source={imageSource} priority={"high"} />
                 <View style={styles.headerUserInfo}>
                     <Text style={styles.userText}>Bem vindo, {profile?.displayName}</Text>
                     <Text style={styles.userName}>@{username}</Text>
