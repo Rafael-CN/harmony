@@ -20,6 +20,8 @@ namespace Harmony.Services.Spotify
         Task<List<MusicDTO>?> GetTopSongs(User user, int limit = 5);
         Task<List<SpotifyArtist>?> GetTopArtists(User user, int limit = 5);
 
+        Task<string?> GetTrackPreviewUrl(string trackId);
+
         Task<int?> GetLikedSongsCount(User user);
     }
 }

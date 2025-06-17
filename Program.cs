@@ -13,9 +13,15 @@ using Harmony.Services.Recommendations;
 using Harmony.Services.UserStatus;
 using Harmony.Services.Photos;
 using Harmony.Services.Follows;
+using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
+using Hangfire.Mongo.Migration.Strategies.Backup;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoConnection");
+var hangfireConnectionString = builder.Configuration.GetConnectionString("HangfireConnection");
 
 builder.Services.AddIdentityMongoDbProvider<User, MongoRole>(
     identityOptions =>
@@ -53,6 +59,24 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseMongoStorage(hangfireConnectionString, new MongoStorageOptions
+    {
+        Prefix = "hangfire.mongo",
+        CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection,
+        MigrationOptions = new MongoMigrationOptions
+        {
+            MigrationStrategy = new MigrateMongoMigrationStrategy(),
+            BackupStrategy = new CollectionMongoBackupStrategy()
+        },
+    })
+);
+
+builder.Services.AddHangfireServer();
+
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
@@ -72,12 +96,15 @@ builder.Services.AddScoped<IReccoService, ReccoService>();
 builder.Services.AddScoped<IStatusService, StatusService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
+builder.Services.AddScoped<ICompatibilityService, CompatibilityService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseHangfireDashboard();
 
 app.UseRouting();
 app.UseMiddleware<ResponseMiddleware>();
@@ -86,4 +113,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+RecurringJob.AddOrUpdate<ICompatibilityService>(
+    "Calculate-user-compatibilities",
+    service => service.CalculateAllUserCompatibilities(),
+    Cron.Daily()
+);
+
 app.Run();

@@ -17,8 +17,8 @@ namespace Harmony.Services.UserStatus
             var status = user.Status ?? new Status();
             status.LastUpdate = DateTime.UtcNow;
 
-            var topArtists = await _spotifyService.GetTopArtists(user);
-            var topSongs = await _spotifyService.GetTopSongs(user);
+            var topArtists = await _spotifyService.GetTopArtists(user, 10);
+            var topSongs = await _spotifyService.GetTopSongs(user, 10);
 
             status.TopArtists = topArtists?.Select(a => a.Id).ToList();
             status.TopSongs = topSongs?.Select(s => s.Id).ToList();
@@ -30,7 +30,7 @@ namespace Harmony.Services.UserStatus
                                     .GroupBy(g => g)
                                     .OrderByDescending(g => g.Count())
                                     .Select(g => g.Key)
-                                    .Take(5).ToList();
+                                    .Take(10).ToList();
             }
 
             status.LikedCount = await _spotifyService.GetLikedSongsCount(user);

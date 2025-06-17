@@ -5,6 +5,7 @@ using System.Text.Json;
 using Harmony.Services.Spotify.DTOs;
 using Harmony.Contracts.Music;
 using Harmony.Models;
+using HtmlAgilityPack;
 
 namespace Harmony.Services.Spotify
 {
@@ -204,6 +205,7 @@ namespace Harmony.Services.Spotify
             }
             else
             {
+                logger.LogWarning("--> Não foi possível obter as últimas músicas curtidas: {Error}", await response.Content.ReadAsStringAsync());
                 return null;
             }
 
@@ -286,7 +288,41 @@ namespace Harmony.Services.Spotify
 
         #endregion
 
-        private static List<MusicDTO> TracksToMusics(List<SpotifyTrack> tracks)
+        public async Task<string?> GetTrackPreviewUrl(string trackId)
+        {
+            var client = httpClientFactory.CreateClient("SpotifyPublicPage");
+            var trackUrl = $"https://open.spotify.com/track/{trackId}";
+
+            try
+            {
+                var html = await client.GetStringAsync(trackUrl);
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(html);
+
+                var scdnLink = htmlDoc.DocumentNode
+                    .Descendants()
+                    .SelectMany(node => node.Attributes)
+                    .Select(attr => attr.Value)
+                    .FirstOrDefault(value => !string.IsNullOrEmpty(value) && value.Contains("p.scdn.co"));
+
+                if (scdnLink != null)
+                {
+                    return scdnLink;
+                }
+                else
+                {
+                    logger.LogWarning("--> Não foi possível obter a URL do preview do track: {TrackId}", trackId);
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "--> Erro ao obter a URL do preview do track: {TrackId}", trackId);
+                return null;
+            }
+        }
+
+        private List<MusicDTO> TracksToMusics(List<SpotifyTrack> tracks)
         {
             var musics = new List<MusicDTO>();
             foreach (var track in tracks)

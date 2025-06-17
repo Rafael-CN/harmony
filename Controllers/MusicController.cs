@@ -41,18 +41,6 @@ namespace Harmony.Controllers
             return Ok(musics);
         }
 
-        [HttpGet("top/songs")]
-        public async Task<IActionResult> GetTopSongs([FromQuery] int limit = 5)
-        {
-            var user = await GetUser();
-            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
-
-            var musics = await spotifyService.GetTopSongs(user, limit);
-            if (musics == null) return BadRequest(new { Message = "Não foi possível obter as músicas mais populares" });
-
-            return Ok(musics);
-        }
-
         [HttpGet("search")]
         public async Task<IActionResult> SearchSongs([FromQuery] string query, int offset = 0)
         {
@@ -87,6 +75,18 @@ namespace Harmony.Controllers
             if (artist == null) return BadRequest(new { Message = "Não foi possível encontrar o artista" });
 
             return Ok(artist);
+        }
+
+        [HttpGet("{trackId}/preview")]
+        public async Task<IActionResult> GetTrackPreview(string trackId)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            var previewUrl = await spotifyService.GetTrackPreviewUrl(trackId);
+            if (previewUrl == null) return BadRequest(new { Message = "Não foi possível obter a URL do preview do track" });
+
+            return Ok(new { url = previewUrl });
         }
     }
 }
