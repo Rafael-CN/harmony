@@ -1,6 +1,6 @@
-namespace Harmony.Services.DTOs.Spotify
+namespace Harmony.Services.Spotify.DTOs
 {
-    public class Track
+    public class SpotifyTrack
     {
         public required string Id { get; set; }
 
@@ -16,7 +16,7 @@ namespace Harmony.Services.DTOs.Spotify
 
         public string? PreviewUrl { get; set; }
 
-        public required Album Album { get; set; }
-        public required List<Artist> Artists { get; set; }
+        public required SpotifyAlbum Album { get; set; }
+        public required List<SpotifyArtist> Artists { get; set; }
     }
 }

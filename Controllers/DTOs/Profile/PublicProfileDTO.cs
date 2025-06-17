@@ -8,5 +8,8 @@ namespace Harmony.Controllers.DTOs.Profile
         public string? Bio { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public Status? Status { get; set; }
+
+        public int FollowersCount { get; set; }
+        public int FollowingCount { get; set; }
     }
 }

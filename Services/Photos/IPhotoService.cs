@@ -1,6 +1,6 @@
 ﻿using CloudinaryDotNet.Actions;
 
-namespace Harmony.Services.Interfaces
+namespace Harmony.Services.Photos
 {
     public interface IPhotoService
     {

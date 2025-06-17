@@ -1,6 +1,6 @@
-namespace Harmony.Services.DTOs.Spotify
+namespace Harmony.Services.Spotify.DTOs
 {
-    public class Token
+    public class SpotifyToken
     {
         public string AccessToken { get; set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;

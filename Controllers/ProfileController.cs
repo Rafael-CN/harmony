@@ -1,6 +1,8 @@
 ﻿using Harmony.Controllers.DTOs.Profile;
 using Harmony.Models;
-using Harmony.Services.Interfaces;
+using Harmony.Services.Follows;
+using Harmony.Services.Photos;
+using Harmony.Services.UserStatus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +17,8 @@ namespace Harmony.Controllers
 
         UserManager<User> userManager,
         IStatusService statusService,
-        IPhotoService photoService
+        IPhotoService photoService,
+        IFollowService followService
 
     ) : ControllerBase
     {
@@ -40,7 +43,9 @@ namespace Harmony.Controllers
                 DisplayName = user.Profile?.DisplayName ?? user.UserName!,
                 Bio = user.Profile?.Bio,
                 ProfilePictureUrl = user.Profile?.ProfilePictureUrl,
-                Status = status
+                Status = status,
+                FollowersCount = user.FollowersCount,
+                FollowingCount = user.FollowingCount
             };
 
             return Ok(publicProfile);
@@ -59,10 +64,44 @@ namespace Harmony.Controllers
                 DisplayName = user.Profile?.DisplayName ?? user.UserName!,
                 Bio = user.Profile?.Bio,
                 ProfilePictureUrl = user.Profile?.ProfilePictureUrl,
-                Status = status
+                Status = status,
+                FollowersCount = user.FollowersCount,
+                FollowingCount = user.FollowingCount
             };
 
             return Ok(profileDto);
+        }
+
+        [HttpPost("{username}/follow")]
+        public async Task<IActionResult> FollowProfile(string username)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            var targetUser = await userManager.FindByNameAsync(username);
+            if (targetUser == null) return NotFound(new { Message = "Perfil não encontrado" });
+
+            if (user.Id == targetUser.Id) return BadRequest(new { Message = "Você não pode seguir a si mesmo" });
+
+            var result = await followService.FollowAsync(user.Id.ToString(), targetUser.Id.ToString());
+            if (!result) return BadRequest(new { Message = "Erro ao seguir o perfil" });
+
+            return Ok(new { Message = "Perfil seguido com sucesso" });
+        }
+
+        [HttpPost("{username}/unfollow")]
+        public async Task<IActionResult> UnfollowProfile(string username)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            var targetUser = await userManager.FindByNameAsync(username);
+            if (targetUser == null) return NotFound(new { Message = "Perfil não encontrado" });
+
+            var result = await followService.UnfollowAsync(user.Id.ToString(), targetUser.Id.ToString());
+            if (!result) return BadRequest(new { Message = "Erro ao deixar de seguir o perfil" });
+
+            return Ok(new { Message = "Perfil deixado de seguir com sucesso" });
         }
 
         [HttpPut("me")]

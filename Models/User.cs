@@ -11,5 +11,8 @@ namespace Harmony.Models
         public Profile? Profile { get; set; }
 
         public Status? Status { get; set; }
+
+        public int FollowersCount { get; set; } = 0;
+        public int FollowingCount { get; set; } = 0;
     }
 }

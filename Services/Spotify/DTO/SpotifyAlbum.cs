@@ -1,6 +1,6 @@
-namespace Harmony.Services.DTOs.Spotify
+namespace Harmony.Services.Spotify.DTOs
 {
-    public class Album
+    public class SpotifyAlbum
     {
         public required string Id { get; set; }
 
@@ -9,6 +9,6 @@ namespace Harmony.Services.DTOs.Spotify
         public required string Name { get; set; }
         public required string Uri { get; set; }
 
-        public required List<Image> Images { get; set; }
+        public required List<SpotifyImage> Images { get; set; }
     }
 }

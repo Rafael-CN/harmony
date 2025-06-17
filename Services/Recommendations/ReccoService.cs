@@ -1,10 +1,10 @@
 using System.Text.Json;
+using Harmony.Contracts.Music;
 using Harmony.Models;
-using Harmony.Services.DTOs.Recco;
-using Harmony.Services.Interfaces;
-using Harmony.Services.Models;
+using Harmony.Services.Recommendations.DTOs;
+using Harmony.Services.Spotify;
 
-namespace Harmony.Services
+namespace Harmony.Services.Recommendations
 {
     public class ReccoService(IHttpClientFactory httpClientFactory, ISpotifyService spotifyService, ILogger<ReccoService> logger) : IReccoService
     {
@@ -15,7 +15,7 @@ namespace Harmony.Services
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        public async Task<List<Music>?> GetRecommendations(User user, IEnumerable<string> seeds, int limit = 5)
+        public async Task<List<MusicDTO>?> GetRecommendations(User user, IEnumerable<string> seeds, int limit = 5)
         {
             if (seeds == null || !seeds.Any()) return null;
             var seedsIds = string.Join(",", seeds.Take(limit));
@@ -25,13 +25,14 @@ namespace Harmony.Services
             var response = await client.GetAsync($"{_baseUrl}track/recommendation?seeds={seedsIds}&size={limit}&popularity=75");
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogInformation("--> Erro ao buscar recomendações: {Error}", await response.Content.ReadAsStringAsync());
+                logger.LogInformation("--> Erro ao buscar recomendaï¿½ï¿½es: {Error}", await response.Content.ReadAsStringAsync());
                 return null;
-            };
+            }
+            ;
 
             var json = await response.Content.ReadAsStringAsync();
 
-            var pagedData = JsonSerializer.Deserialize<Page>(json, _jsonSerializerOptions);
+            var pagedData = JsonSerializer.Deserialize<PageDTO>(json, _jsonSerializerOptions);
             if (pagedData?.Content == null) return [];
 
             var tracksId = pagedData.Content.Select(track =>

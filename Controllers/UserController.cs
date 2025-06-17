@@ -1,17 +1,24 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-using Harmony.Services.Interfaces;
 using Harmony.Controllers.DTOs.User;
 using Harmony.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Harmony.Services.Authentication;
+using Harmony.Services.Spotify;
 
 namespace Harmony.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(UserManager<User> userManager, IJWTService jwtService, ISpotifyService spotifyService) : ControllerBase
+    public class UserController(
+
+        UserManager<User> userManager,
+        IJWTService jwtService,
+        ISpotifyService spotifyService
+
+    ) : ControllerBase
     {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO model)

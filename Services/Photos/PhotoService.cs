@@ -1,10 +1,9 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Harmony.Services.Interfaces;
 
-namespace Harmony.Services
+namespace Harmony.Services.Photos
 {
-    public class PhotoService: IPhotoService
+    public class PhotoService : IPhotoService
     {
         private readonly ILogger<PhotoService> _logger;
         private readonly Cloudinary _cloudinary;
@@ -35,14 +34,14 @@ namespace Harmony.Services
 
             uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-            if (uploadResult.Error != null) 
+            if (uploadResult.Error != null)
             {
                 _logger.LogInformation("Houve um erro ao salvar a foto: {Error}", uploadResult.Error.Message);
             }
 
             return uploadResult;
         }
-        
+
         public async Task<DeletionResult> DeletePhotoAsync(string publicId)
         {
             var deleteParams = new DeletionParams(publicId);

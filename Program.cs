@@ -4,11 +4,15 @@ using AspNetCore.Identity.Mongo.Model;
 using AspNetCore.Identity.Mongo;
 using System.Text;
 
-using Harmony.Services.Interfaces;
-using Harmony.Services;
 using Harmony.Models;
 using Harmony.Data;
 using Harmony.Middlewares;
+using Harmony.Services.Authentication;
+using Harmony.Services.Spotify;
+using Harmony.Services.Recommendations;
+using Harmony.Services.UserStatus;
+using Harmony.Services.Photos;
+using Harmony.Services.Follows;
 
 var builder = WebApplication.CreateBuilder(args);
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoConnection");
@@ -67,6 +71,7 @@ builder.Services.AddScoped<ISpotifyService, SpotifyService>();
 builder.Services.AddScoped<IReccoService, ReccoService>();
 builder.Services.AddScoped<IStatusService, StatusService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<IFollowService, FollowService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

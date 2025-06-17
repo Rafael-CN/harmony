@@ -4,9 +4,8 @@ using System.Security.Claims;
 using System.Text;
 
 using Harmony.Models;
-using Harmony.Services.Interfaces;
 
-namespace Harmony.Services
+namespace Harmony.Services.Authentication
 {
     public class JWTService : IJWTService
     {

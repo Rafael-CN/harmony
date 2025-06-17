@@ -1,6 +1,6 @@
-namespace Harmony.Services.DTOs.Spotify
+namespace Harmony.Services.Spotify.DTOs
 {
-    public class Image
+    public class SpotifyImage
     {
         public required string Url { get; set; }
 

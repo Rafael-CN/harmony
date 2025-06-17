@@ -2,12 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-using Harmony.Services.Interfaces;
-using Harmony.Services.Models;
-using Harmony.Services.DTOs.Spotify;
+using Harmony.Services.Spotify.DTOs;
+using Harmony.Contracts.Music;
 using Harmony.Models;
 
-namespace Harmony.Services
+namespace Harmony.Services.Spotify
 {
     public class SpotifyService(
 
@@ -62,7 +61,7 @@ namespace Harmony.Services
             {
                 var json = await response.Content.ReadAsStringAsync();
 
-                var token = JsonSerializer.Deserialize<Token>(json, _jsonSerializerOptions);
+                var token = JsonSerializer.Deserialize<SpotifyToken>(json, _jsonSerializerOptions);
                 if (token == null) return null;
 
                 if (token.RefreshToken != null)
@@ -83,7 +82,7 @@ namespace Harmony.Services
             }
         }
 
-        public async Task<Token?> GetToken(string authCode)
+        public async Task<SpotifyToken?> GetToken(string authCode)
         {
             var client = httpClientFactory.CreateClient("SpotifyAuth");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicHeader());
@@ -99,7 +98,7 @@ namespace Harmony.Services
             {
                 var json = await response.Content.ReadAsStringAsync();
 
-                var token = JsonSerializer.Deserialize<Token>(json, _jsonSerializerOptions);
+                var token = JsonSerializer.Deserialize<SpotifyToken>(json, _jsonSerializerOptions);
                 return token;
             }
             else
@@ -111,7 +110,7 @@ namespace Harmony.Services
 
         #endregion
 
-        public async Task<Music?> GetSong(User user, string id)
+        public async Task<MusicDTO?> GetSong(User user, string id)
         {
             var client = await ConfigHttpClient(user);
             if (client == null) return null;
@@ -121,10 +120,10 @@ namespace Harmony.Services
             {
                 var json = await response.Content.ReadAsStringAsync();
 
-                var track = JsonSerializer.Deserialize<Track>(json, _jsonSerializerOptions);
+                var track = JsonSerializer.Deserialize<SpotifyTrack>(json, _jsonSerializerOptions);
                 if (track == null) return null;
 
-                return new Music
+                return new MusicDTO
                 {
                     Id = track.Id,
                     Name = track.Name,
@@ -139,7 +138,7 @@ namespace Harmony.Services
             }
         }
 
-        public async Task<List<Music>?> GetSongs(User user, IEnumerable<string> ids)
+        public async Task<List<MusicDTO>?> GetSongs(User user, IEnumerable<string> ids)
         {
             if (ids == null || !ids.Any()) return null;
 
@@ -155,13 +154,40 @@ namespace Harmony.Services
             var jsonObject = JsonDocument.Parse(json);
             var tracksData = jsonObject.RootElement.GetProperty("tracks");
 
-            var tracks = JsonSerializer.Deserialize<List<Track>>(tracksData, _jsonSerializerOptions);
+            var tracks = JsonSerializer.Deserialize<List<SpotifyTrack>>(tracksData, _jsonSerializerOptions);
             if (tracks == null) return [];
 
             return TracksToMusics(tracks);
         }
 
-        public async Task<List<Music>?> GetLastLikedSongs(User user, int limit = 5)
+        public async Task<ArtistDTO?> GetArtist(User user, string id)
+        {
+            var client = await ConfigHttpClient(user);
+            if (client == null) return null;
+
+            var response = await client.GetAsync($"artists/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+
+                var artist = JsonSerializer.Deserialize<SpotifyArtist>(json, _jsonSerializerOptions);
+                if (artist == null) return null;
+
+                return new ArtistDTO
+                {
+                    Id = artist.Id,
+                    Name = artist.Name,
+                    ImageUrl = artist.Images.Last().Url,
+                    LinkUrl = artist.Uri
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<MusicDTO>?> GetLastLikedSongs(User user, int limit = 5)
         {
             var client = await ConfigHttpClient(user);
             if (client == null) return null;
@@ -171,7 +197,7 @@ namespace Harmony.Services
             {
                 var json = await response.Content.ReadAsStringAsync();
 
-                var pagedData = JsonSerializer.Deserialize<Page<Like>>(json, _jsonSerializerOptions);
+                var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyLike>>(json, _jsonSerializerOptions);
                 if (pagedData == null) return [];
 
                 return TracksToMusics(pagedData.Items.Select(i => i.Track).ToList());
@@ -183,7 +209,7 @@ namespace Harmony.Services
 
         }
 
-        public async Task<List<Music>?> GetQuerySongs(User user, string query, int offset = 0)
+        public async Task<List<MusicDTO>?> GetQuerySongs(User user, string query, int offset = 0)
         {
             var client = await ConfigHttpClient(user);
             if (client == null) return null;
@@ -195,7 +221,7 @@ namespace Harmony.Services
                 var jsonObject = JsonDocument.Parse(json);
                 var tracks = jsonObject.RootElement.GetProperty("tracks");
 
-                var pagedData = JsonSerializer.Deserialize<Page<Track>>(tracks, _jsonSerializerOptions);
+                var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyTrack>>(tracks, _jsonSerializerOptions);
                 if (pagedData == null) return [];
 
                 return TracksToMusics(pagedData.Items);
@@ -215,14 +241,14 @@ namespace Harmony.Services
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();
-            var pagedData = JsonSerializer.Deserialize<Page<Like>>(json, _jsonSerializerOptions);
+            var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyLike>>(json, _jsonSerializerOptions);
 
             return pagedData?.Total;
         }
 
         #region Top items
 
-        public async Task<List<Music>?> GetTopSongs(User user, int limit = 5)
+        public async Task<List<MusicDTO>?> GetTopSongs(User user, int limit = 5)
         {
             var client = await ConfigHttpClient(user);
             if (client == null) return null;
@@ -232,7 +258,7 @@ namespace Harmony.Services
             {
                 var json = await response.Content.ReadAsStringAsync();
 
-                var pagedData = JsonSerializer.Deserialize<Page<Track>>(json, _jsonSerializerOptions);
+                var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyTrack>>(json, _jsonSerializerOptions);
                 if (pagedData == null) return [];
 
                 return TracksToMusics(pagedData.Items);
@@ -243,7 +269,7 @@ namespace Harmony.Services
             }
         }
 
-        public async Task<List<Artist>?> GetTopArtists(User user, int limit = 5)
+        public async Task<List<SpotifyArtist>?> GetTopArtists(User user, int limit = 5)
         {
             var client = await ConfigHttpClient(user);
             if (client == null) return null;
@@ -252,7 +278,7 @@ namespace Harmony.Services
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();
-            var pagedData = JsonSerializer.Deserialize<Page<Artist>>(json, _jsonSerializerOptions);
+            var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyArtist>>(json, _jsonSerializerOptions);
             if (pagedData == null) return [];
 
             return pagedData.Items;
@@ -260,12 +286,12 @@ namespace Harmony.Services
 
         #endregion
 
-        private static List<Music> TracksToMusics(List<Track> tracks)
+        private static List<MusicDTO> TracksToMusics(List<SpotifyTrack> tracks)
         {
-            var musics = new List<Music>();
+            var musics = new List<MusicDTO>();
             foreach (var track in tracks)
             {
-                musics.Add(new Music
+                musics.Add(new MusicDTO
                 {
                     Id = track.Id,
                     Name = track.Name,

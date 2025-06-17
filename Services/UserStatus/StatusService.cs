@@ -1,8 +1,8 @@
 using Harmony.Models;
-using Harmony.Services.Interfaces;
+using Harmony.Services.Spotify;
 using Microsoft.AspNetCore.Identity;
 
-namespace Harmony.Services
+namespace Harmony.Services.UserStatus
 {
     public class StatusService
     (
@@ -20,8 +20,8 @@ namespace Harmony.Services
             var topArtists = await _spotifyService.GetTopArtists(user);
             var topSongs = await _spotifyService.GetTopSongs(user);
 
-            status.TopArtists = topArtists?.Select(a => a.Name).ToList();
-            status.TopSongs = topSongs?.Select(s => s.Name).ToList();
+            status.TopArtists = topArtists?.Select(a => a.Id).ToList();
+            status.TopSongs = topSongs?.Select(s => s.Id).ToList();
 
             if (topArtists != null && topArtists.Any())
             {

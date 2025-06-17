@@ -1,6 +1,6 @@
-namespace Harmony.Services.DTOs.Recco
+namespace Harmony.Services.Recommendations.DTOs
 {
-    public class Track
+    public class TrackDTO
     {
         public required string Id { get; set; }
 
@@ -9,6 +9,6 @@ namespace Harmony.Services.DTOs.Recco
 
         public required int Popularity { get; set; }
 
-        public required List<Artist> Artists { get; set; }
+        public required List<ArtistDTO> Artists { get; set; }
     }
 }

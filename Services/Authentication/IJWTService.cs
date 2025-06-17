@@ -1,6 +1,6 @@
 using Harmony.Models;
 
-namespace Harmony.Services.Interfaces
+namespace Harmony.Services.Authentication
 {
     public interface IJWTService
     {

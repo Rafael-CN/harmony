@@ -1,6 +1,6 @@
-namespace Harmony.Services.DTOs.Recco
+namespace Harmony.Services.Recommendations.DTOs
 {
-    public class Artist
+    public class ArtistDTO
     {
         public required string Id { get; set; }
         public required string Name { get; set; }
