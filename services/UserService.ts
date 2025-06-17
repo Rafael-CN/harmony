@@ -12,6 +12,8 @@ export interface ProfileData {
         topGenres: Array<string>;
         likedCount: number;
     };
+    followersCount: number;
+    followingCount: number;
 }
 
 async function getUsername(): Promise<string> {

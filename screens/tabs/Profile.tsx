@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -140,12 +140,12 @@ export default function Profile() {
                     </View>
 
                     <View style={styles.statsContainer}>
-                        <Text style={styles.statsValue}>0</Text>
+                        <Text style={styles.statsValue}>{profile?.followersCount}</Text>
                         <Text style={styles.statsTitle}>Seguidores</Text>
                     </View>
 
                     <View style={styles.statsContainer}>
-                        <Text style={styles.statsValue}>0</Text>
+                        <Text style={styles.statsValue}>{profile?.followingCount}</Text>
                         <Text style={styles.statsTitle}>Seguindo</Text>
                     </View>
                 </View>
@@ -153,7 +153,7 @@ export default function Profile() {
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Gêneros favoritos</Text>
                     <View style={styles.genresContainer}>
-                        {profile?.status.topGenres.slice(0, 3).map((genre, i) => (
+                        {profile?.status.topGenres.slice(0, 2).map((genre, i) => (
                             <GenreTag key={i} genre={genre} />
                         ))}
                     </View>
