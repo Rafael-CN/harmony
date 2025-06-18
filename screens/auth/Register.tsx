@@ -15,11 +15,11 @@ export default function Register() {
         navigator.goBack();
     };
 
-    const [disabled, setDisabled] = useState(false);
+    const [signingUp, setSigningUp] = useState(false);
     const [user, setUser] = useState({ username: "", password: "" });
 
-    const handleRegister = async () => {
-        setDisabled(true);
+    const handleSignUp = async () => {
+        setSigningUp(true);
 
         const response = await authService.register(user.username, user.password);
         if (response.succeeded) {
@@ -29,7 +29,7 @@ export default function Register() {
             alert("Houve um erro ao cadastrar o usuário");
         }
 
-        setDisabled(false);
+        setSigningUp(false);
     };
 
     return (
@@ -46,7 +46,7 @@ export default function Register() {
                     <TextInput style={styles.input} placeholder="Email" placeholderTextColor={color.light}></TextInput>
                     <TextInput style={styles.input} placeholder="Senha" placeholderTextColor={color.light} secureTextEntry autoCapitalize="none" onChangeText={(value) => setUser({ ...user, password: value })}></TextInput>
 
-                    <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={disabled}>
+                    <TouchableOpacity style={[styles.button, signingUp && styles.buttonDisabled]} onPress={handleSignUp} disabled={signingUp}>
                         <Text style={styles.buttonText}>Cadastrar</Text>
                     </TouchableOpacity>
 
@@ -115,6 +115,10 @@ const styles = StyleSheet.create({
         color: color.light,
         fontSize: 18,
         fontFamily: "Nexa-Heavy",
+    },
+
+    buttonDisabled: {
+        opacity: 0.5,
     },
 
     link: {

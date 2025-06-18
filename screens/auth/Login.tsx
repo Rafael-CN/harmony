@@ -12,7 +12,7 @@ export default function Login() {
     const navigator = useNavigation();
     const authService = useAuth();
 
-    const [disabled, setDisabled] = useState(false);
+    const [signingIn, setSigningIn] = useState(false);
     const [isInvalid, setInvalid] = useState(false);
 
     const [user, setUser] = useState({ name: "", password: "" });
@@ -21,9 +21,9 @@ export default function Login() {
         navigator.navigate("Register" as never);
     };
 
-    const handleLogin = async () => {
+    const handleSigningIn = async () => {
         setInvalid(false);
-        setDisabled(true);
+        setSigningIn(true);
 
         const response = await authService.login(user.name, user.password);
         if (response.succeeded) {
@@ -32,7 +32,8 @@ export default function Login() {
         } else {
             setInvalid(true);
         }
-        setDisabled(false);
+
+        setSigningIn(false);
     };
 
     useEffect(() => {
@@ -57,7 +58,7 @@ export default function Login() {
 
                     {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
 
-                    <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={disabled}>
+                    <TouchableOpacity style={[styles.button, signingIn && styles.buttonDisabled]} onPress={handleSigningIn} disabled={signingIn}>
                         <Text style={styles.buttonText}>Entrar</Text>
                     </TouchableOpacity>
                     <Pressable style={styles.link} onPress={goToRegister}>
@@ -126,6 +127,10 @@ const styles = StyleSheet.create({
         fontFamily: "Nexa-Heavy",
     },
 
+    buttonDisabled: {
+        opacity: 0.5,
+    },
+
     link: {
         flexDirection: "row",
         alignItems: "center",
@@ -145,7 +150,7 @@ const styles = StyleSheet.create({
     },
 
     error: {
-        color: "red",
+        color: "#E55381",
         marginTop: 10,
         fontFamily: "Nexa-ExtraLight",
     },

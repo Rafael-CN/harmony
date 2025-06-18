@@ -28,10 +28,14 @@ export default function Spotify() {
     const authService = useAuth();
 
     useEffect(() => {
+        setDisabled(true);
+
         authService.isLinkedSpotify().then((isLinked) => {
             if (isLinked) {
                 navigator.navigate("TabNavigator" as never);
             }
+
+            setDisabled(false);
         });
     }, []);
 

@@ -4,6 +4,7 @@ const { put, post, get } = useAxios();
 
 export interface ProfileData {
     displayName: string;
+    username: string;
     profilePictureUrl: string;
     bio: string;
     status: {
@@ -18,22 +19,22 @@ export interface ProfileData {
 
 async function getUsername(): Promise<string> {
     const response = await get("user/name", true);
-    return response.data.username;
+    return response?.data.username;
 }
 
 async function getDisplayName(): Promise<string> {
     const response = await get("profile/name", true);
-    return response.data.displayName;
+    return response?.data.displayName;
 }
 
 async function getProfile(): Promise<ProfileData> {
     const response = await get("profile/me", true);
-    return response.data;
+    return response?.data;
 }
 
 async function updateProfile(displayName: string, bio: string): Promise<boolean> {
     const response = await put("profile/me", { displayName, bio }, true);
-    return response.status === 200;
+    return response?.status === 200;
 }
 
 async function updateProfilePicture(fileUri: string): Promise<string | null> {
@@ -50,7 +51,7 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
             "Content-Type": "multipart/form-data",
         });
 
-        if (response.status === 200 && response.data.url) {
+        if (response && response.status === 200 && response.data.url) {
             return response.data.url;
         }
 

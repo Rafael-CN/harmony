@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from "axios";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
-async function put(route: string, data: any, useAuth: boolean = false): Promise<AxiosResponse> {
+async function put(route: string, data: any, useAuth: boolean = false): Promise<AxiosResponse | null> {
     try {
         const userToken = await AsyncStorage.getItem("token");
 
@@ -16,11 +16,11 @@ async function put(route: string, data: any, useAuth: boolean = false): Promise<
         return response;
     } catch (error) {
         console.error("Error putting to API:", error);
-        throw error;
+        return null;
     }
 }
 
-async function post(route: string, data: any, useAuth: boolean = false, headers: any = {}): Promise<AxiosResponse> {
+async function post(route: string, data: any, useAuth: boolean = false, headers: any = {}): Promise<AxiosResponse | null> {
     try {
         const userToken = await AsyncStorage.getItem("token");
 
@@ -35,11 +35,11 @@ async function post(route: string, data: any, useAuth: boolean = false, headers:
         return response;
     } catch (error) {
         console.error("Error posting to API:", error);
-        throw error;
+        return null;
     }
 }
 
-async function get(route: string, useAuth: boolean = false): Promise<AxiosResponse> {
+async function get(route: string, useAuth: boolean = false): Promise<AxiosResponse | null> {
     try {
         const userToken = await AsyncStorage.getItem("token");
 
@@ -53,7 +53,7 @@ async function get(route: string, useAuth: boolean = false): Promise<AxiosRespon
         return response;
     } catch (error) {
         console.error("Error getting from API:", error);
-        throw error;
+        return null;
     }
 }
 

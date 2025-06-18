@@ -6,6 +6,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Login, Register, Spotify } from "./screens/auth";
 import TabNavigator from "./navigation/TabNavigator";
 import FindNavigator from "./navigation/FindNavigator";
+import { View } from "react-native";
+import { color } from "./theme.json";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,13 +34,15 @@ export default function App() {
 
     return (
         <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
-                <Stack.Screen name="Login" component={Login}></Stack.Screen>
-                <Stack.Screen name="Register" component={Register}></Stack.Screen>
-                <Stack.Screen name="Spotify" component={Spotify}></Stack.Screen>
-                <Stack.Screen name="TabNavigator" component={TabNavigator}></Stack.Screen>
-                <Stack.Screen name="FindNavigator" component={FindNavigator} options={{ presentation: "transparentModal", animation: "none" }}></Stack.Screen>
-            </Stack.Navigator>
+            <View style={{ flex: 1, backgroundColor: color.extraDark }}>
+                <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom" }} initialRouteName="Login">
+                    <Stack.Screen name="Login" component={Login}></Stack.Screen>
+                    <Stack.Screen name="Register" component={Register}></Stack.Screen>
+                    <Stack.Screen name="Spotify" component={Spotify}></Stack.Screen>
+                    <Stack.Screen name="TabNavigator" component={TabNavigator}></Stack.Screen>
+                    <Stack.Screen name="FindNavigator" component={FindNavigator} options={{ presentation: "transparentModal", animation: "none" }}></Stack.Screen>
+                </Stack.Navigator>
+            </View>
         </NavigationContainer>
     );
 }
