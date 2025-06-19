@@ -124,14 +124,7 @@ namespace Harmony.Services.Spotify
                 var track = JsonSerializer.Deserialize<SpotifyTrack>(json, _jsonSerializerOptions);
                 if (track == null) return null;
 
-                return new MusicDTO
-                {
-                    Id = track.Id,
-                    Name = track.Name,
-                    Artist = track.Artists.First().Name,
-                    LinkUrl = track.Uri,
-                    ImageUrl = track.Album.Images.Last().Url,
-                };
+                ; return TrackToMusic(track);
             }
             else
             {
@@ -248,6 +241,20 @@ namespace Harmony.Services.Spotify
             return pagedData?.Total;
         }
 
+        public async Task<List<bool>> GetCheckedLikedSongs(User user, List<string> trackIds)
+        {
+            var client = await ConfigHttpClient(user);
+            if (client == null) return [];
+
+            var response = await client.GetAsync($"me/tracks/contains?ids={string.Join(",", trackIds)}");
+            if (!response.IsSuccessStatusCode) return [];
+
+            var json = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<List<bool>>(json, _jsonSerializerOptions);
+
+            return data ?? [];
+        }
+
         #region Top items
 
         public async Task<List<MusicDTO>?> GetTopSongs(User user, int limit = 5)
@@ -288,6 +295,60 @@ namespace Harmony.Services.Spotify
 
         #endregion
 
+        public async Task<List<string>?> GetRecommendations(User user)
+        {
+            var topSongs = user.Status?.TopSongs;
+            if (topSongs == null || !topSongs.Any()) return null;
+
+            return await GetRecommendations(user, topSongs);
+        }
+
+        public async Task<List<string>?> GetRecommendations(User user, List<string> trackIds)
+        {
+            if (trackIds == null || !trackIds.Any()) return null;
+
+            var tracksUrls = trackIds.Select(id => $"https://open.spotify.com/track/{id}");
+
+            var recommendedSongs = await Task.WhenAll(tracksUrls.Select(GetScrapedRecommendations));
+
+            var recommendedUrls = recommendedSongs
+                                    .SelectMany(i => i)
+                                    .Distinct()
+                                    .Select(id => $"https://open.spotify.com/track/{id}")
+                                    .OrderBy(i => Guid.NewGuid())
+                                    .Take(10);
+
+            recommendedSongs = await Task.WhenAll(recommendedUrls.Select(GetScrapedRecommendations));
+
+            var randomizedSongs = recommendedSongs.SelectMany(i => i).Distinct().Take(50);
+
+            var checkedSongs = await GetCheckedLikedSongs(user, randomizedSongs.ToList());
+
+            randomizedSongs = randomizedSongs.Where((_, index) => !checkedSongs[index]);
+            return randomizedSongs.OrderBy(i => Guid.NewGuid()).Take(5).ToList();
+        }
+
+        private async Task<List<string>> GetScrapedRecommendations(string url)
+        {
+            var client = httpClientFactory.CreateClient("SpotifyPublicPage");
+            if (url == null) return [];
+
+            var html = await client.GetStringAsync(url);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+
+            var recommendedSongs = htmlDoc.DocumentNode
+                .Descendants()
+                .Where(node => node.Name == "a")
+                .Select(node => node.GetAttributeValue("href", ""))
+                .Where(href => href.Contains("track"))
+                .Select(href => href.Split("/").Last())
+                .Distinct()
+                .ToList();
+
+            return recommendedSongs;
+        }
+
         public async Task<string?> GetTrackPreviewUrl(string trackId)
         {
             var client = httpClientFactory.CreateClient("SpotifyPublicPage");
@@ -327,17 +388,24 @@ namespace Harmony.Services.Spotify
             var musics = new List<MusicDTO>();
             foreach (var track in tracks)
             {
-                musics.Add(new MusicDTO
-                {
-                    Id = track.Id,
-                    Name = track.Name,
-                    Artist = track.Artists.First().Name,
-                    LinkUrl = track.Uri,
-                    ImageUrl = track.Album.Images.Last().Url,
-                });
+                musics.Add(TrackToMusic(track));
             }
 
             return musics;
+        }
+
+        private MusicDTO TrackToMusic(SpotifyTrack track)
+        {
+            return new MusicDTO
+            {
+                Id = track.Id,
+                Name = track.Name,
+                Artist = track.Artists.First().Name,
+                LinkUrl = track.Uri,
+                SmallImageUrl = track.Album.Images.Last().Url,
+                LargeImageUrl = track.Album.Images.First().Url,
+                MediumImageUrl = track.Album.Images[1].Url,
+            };
         }
     }
 }

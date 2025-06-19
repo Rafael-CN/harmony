@@ -4,10 +4,15 @@ namespace Harmony.Contracts.Music
     {
         public required string Id { get; set; }
 
-        public required string Name { get; set; }
-        public required string Artist { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Artist { get; set; } = string.Empty;
 
-        public required string LinkUrl { get; set; }
-        public required string ImageUrl { get; set; }
+        public string LinkUrl { get; set; } = string.Empty;
+
+        public string SmallImageUrl { get; set; } = string.Empty;
+        public string MediumImageUrl { get; set; } = string.Empty;
+        public string LargeImageUrl { get; set; } = string.Empty;
+
+        public string PreviewUrl { get; set; } = string.Empty;
     }
 }

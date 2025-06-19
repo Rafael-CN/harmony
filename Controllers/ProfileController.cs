@@ -38,14 +38,9 @@ namespace Harmony.Controllers
 
             var status = await statusService.GetStatus(user);
 
-            var publicProfile = new PublicProfileDTO
+            var publicProfile = new PublicProfileDTO(user)
             {
-                DisplayName = user.Profile?.DisplayName ?? user.UserName!,
-                Bio = user.Profile?.Bio,
-                ProfilePictureUrl = user.Profile?.ProfilePictureUrl,
-                Status = status,
-                FollowersCount = user.FollowersCount,
-                FollowingCount = user.FollowingCount
+                Status = status
             };
 
             return Ok(publicProfile);
@@ -59,17 +54,12 @@ namespace Harmony.Controllers
 
             var status = await statusService.GetStatus(user);
 
-            var profileDto = new PublicProfileDTO
+            var publicProfile = new PublicProfileDTO(user)
             {
-                DisplayName = user.Profile?.DisplayName ?? user.UserName!,
-                Bio = user.Profile?.Bio,
-                ProfilePictureUrl = user.Profile?.ProfilePictureUrl,
-                Status = status,
-                FollowersCount = user.FollowersCount,
-                FollowingCount = user.FollowingCount
+                Status = status
             };
 
-            return Ok(profileDto);
+            return Ok(publicProfile);
         }
 
         [HttpPost("{username}/follow")]

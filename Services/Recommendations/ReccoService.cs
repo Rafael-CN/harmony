@@ -18,14 +18,18 @@ namespace Harmony.Services.Recommendations
         public async Task<List<MusicDTO>?> GetRecommendations(User user, IEnumerable<string> seeds, int limit = 5)
         {
             if (seeds == null || !seeds.Any()) return null;
-            var seedsIds = string.Join(",", seeds.Take(limit));
+            var seedsIds = string.Join(",", seeds.Take(5));
 
             var client = httpClientFactory.CreateClient();
 
-            var response = await client.GetAsync($"{_baseUrl}track/recommendation?seeds={seedsIds}&size={limit}&popularity=75");
+            var requestUrl = $"{_baseUrl}track/recommendation?seeds={seedsIds}&size=25&popularity=100&featureWeight=3";
+
+            var response = await client.GetAsync(requestUrl);
+            logger.LogInformation("--> Realizando requisição para api do ReccoBeat: {RequestUrl}", requestUrl);
+
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogInformation("--> Erro ao buscar recomenda��es: {Error}", await response.Content.ReadAsStringAsync());
+                logger.LogInformation("--> Erro ao buscar recomendações: {Error}", await response.Content.ReadAsStringAsync());
                 return null;
             }
             ;
@@ -35,7 +39,7 @@ namespace Harmony.Services.Recommendations
             var pagedData = JsonSerializer.Deserialize<PageDTO>(json, _jsonSerializerOptions);
             if (pagedData?.Content == null) return [];
 
-            var tracksId = pagedData.Content.Select(track =>
+            var tracksId = pagedData.Content.OrderByDescending(t => t.Popularity).Take(limit).Select(track =>
             {
                 return track.Href.Split("/").Last();
             });

@@ -121,7 +121,7 @@ namespace Harmony.Controllers
         }
 
         [Authorize]
-        [HttpPost("spotify/isLinked")]
+        [HttpGet("spotify/isLinked")]
         public async Task<IActionResult> IsSpotifyLinked()
         {
             var username = User.FindFirstValue(ClaimTypes.Name);
