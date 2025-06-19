@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
-import { ProfileData, useUser } from "../../services/UserService";
 import * as ImagePicker from "expo-image-picker";
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
+import { ProfileData } from "../../types";
+import { useUser } from "../../api/profile";
 
 interface ProfileEditModalProps {
     profile: ProfileData | null;
@@ -15,7 +26,7 @@ interface ProfileEditModalProps {
     onSave: (editedData: ProfileData) => void;
 }
 
-export default function ProfileEditModal({ profile, visible, setVisible, onSave }: ProfileEditModalProps) {
+const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditModalProps) => {
     const userService = useUser();
 
     const [editedProfile, setEditedProfile] = useState<ProfileData | null>(null);
@@ -66,7 +77,10 @@ export default function ProfileEditModal({ profile, visible, setVisible, onSave 
             }
         }
 
-        const textFieldsUpdated = await userService.updateProfile(editedProfile.displayName, editedProfile.bio);
+        const textFieldsUpdated = await userService.updateProfile(
+            editedProfile.displayName,
+            editedProfile.bio
+        );
         if (textFieldsUpdated) {
             onSave(finalProfileData);
         } else {
@@ -76,17 +90,37 @@ export default function ProfileEditModal({ profile, visible, setVisible, onSave 
         setIsSaving(false);
     };
 
-    const imageSource = selectedImageUri ? { uri: selectedImageUri } : editedProfile?.profilePictureUrl ? { uri: editedProfile.profilePictureUrl } : require("../../assets/users/1.png");
+    const imageSource = selectedImageUri
+        ? { uri: selectedImageUri }
+        : editedProfile?.profilePictureUrl
+        ? { uri: editedProfile.profilePictureUrl }
+        : require("../../assets/users/1.png");
 
     return (
-        <Modal transparent visible={visible} animationType="fade" onRequestClose={() => setVisible(false)}>
-            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-                <BlurView intensity={5} tint="dark" style={styles.blurContainer} experimentalBlurMethod="dimezisBlurView">
+        <Modal
+            transparent
+            visible={visible}
+            animationType="fade"
+            onRequestClose={() => setVisible(false)}
+        >
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <BlurView
+                    intensity={5}
+                    tint="dark"
+                    style={styles.blurContainer}
+                    experimentalBlurMethod="dimezisBlurView"
+                >
                     <View style={styles.modal}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>Editar perfil</Text>
 
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setVisible(false)}>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setVisible(false)}
+                            >
                                 <Ionicons name="close" size={24} color={color.light} />
                             </TouchableOpacity>
                         </View>
@@ -100,12 +134,42 @@ export default function ProfileEditModal({ profile, visible, setVisible, onSave 
                             </TouchableOpacity>
                         </View>
 
-                        <TextInput style={styles.modalInput} placeholder="Nome de exibição" placeholderTextColor={color.light} value={editedProfile?.displayName} onChangeText={(value) => setEditedProfile({ ...editedProfile!, displayName: value })} />
-                        <TextInput style={styles.modalInput} placeholder="Bio" multiline placeholderTextColor={color.light} value={editedProfile?.bio} onChangeText={(value) => setEditedProfile({ ...editedProfile!, bio: value })} />
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="Nome de exibição"
+                            placeholderTextColor={color.light}
+                            value={editedProfile?.displayName}
+                            onChangeText={(value) =>
+                                setEditedProfile({ ...editedProfile!, displayName: value })
+                            }
+                        />
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="Bio"
+                            multiline
+                            placeholderTextColor={color.light}
+                            value={editedProfile?.bio}
+                            onChangeText={(value) =>
+                                setEditedProfile({ ...editedProfile!, bio: value })
+                            }
+                        />
 
                         <TouchableOpacity onPress={handleSaveChanges} disabled={isSaving}>
-                            <LinearGradient colors={isSaving ? [color.dark, color.dark] : [color.regular, color.dark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.modalButton}>
-                                {isSaving ? <ActivityIndicator color={color.extraLight} /> : <Text style={styles.modalButtonText}>Salvar</Text>}
+                            <LinearGradient
+                                colors={
+                                    isSaving
+                                        ? [color.dark, color.dark]
+                                        : [color.regular, color.dark]
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.modalButton}
+                            >
+                                {isSaving ? (
+                                    <ActivityIndicator color={color.extraLight} />
+                                ) : (
+                                    <Text style={styles.modalButtonText}>Salvar</Text>
+                                )}
                             </LinearGradient>
                         </TouchableOpacity>
                     </View>
@@ -113,7 +177,7 @@ export default function ProfileEditModal({ profile, visible, setVisible, onSave 
             </KeyboardAvoidingView>
         </Modal>
     );
-}
+};
 
 const styles = StyleSheet.create({
     blurContainer: {
@@ -197,3 +261,5 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
 });
+
+export default ProfileEditModal;

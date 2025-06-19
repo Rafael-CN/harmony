@@ -1,39 +1,25 @@
-import { useAxios } from "./AxiosService";
+import { ProfileData } from "../types";
+import { useAxios } from "./apiClient";
 
-const { put, post, get } = useAxios();
-
-export interface ProfileData {
-    displayName: string;
-    username: string;
-    profilePictureUrl: string;
-    bio: string;
-    status: {
-        topArtists: Array<string>;
-        topSongs: Array<string>;
-        topGenres: Array<string>;
-        likedCount: number;
-    };
-    followersCount: number;
-    followingCount: number;
-}
+const axios = useAxios();
 
 async function getUsername(): Promise<string> {
-    const response = await get("user/name", true);
+    const response = await axios.get("user/name", true);
     return response?.data.username;
 }
 
 async function getDisplayName(): Promise<string> {
-    const response = await get("profile/name", true);
+    const response = await axios.get("profile/name", true);
     return response?.data.displayName;
 }
 
 async function getProfile(): Promise<ProfileData> {
-    const response = await get("profile/me", true);
+    const response = await axios.get("profile/me", true);
     return response?.data;
 }
 
 async function updateProfile(displayName: string, bio: string): Promise<boolean> {
-    const response = await put("profile/me", { displayName, bio }, true);
+    const response = await axios.put("profile/me", { displayName, bio }, true);
     return response?.status === 200;
 }
 
@@ -47,7 +33,7 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
     } as any);
 
     try {
-        const response = await post("profile/me/photo", formData, true, {
+        const response = await axios.post("profile/me/photo", formData, true, {
             "Content-Type": "multipart/form-data",
         });
 

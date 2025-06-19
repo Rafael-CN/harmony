@@ -35,7 +35,18 @@ const tonalPalettes: TonalPalette[] = [
     { dark: "#064E3B", light: "#34D399" },
 ];
 
-const iconSet: (keyof typeof Ionicons.glyphMap)[] = ["musical-notes", "disc", "pulse", "flame", "star", "leaf", "radio", "contrast", "planet", "headset"];
+const iconSet: (keyof typeof Ionicons.glyphMap)[] = [
+    "musical-notes",
+    "disc",
+    "pulse",
+    "flame",
+    "star",
+    "leaf",
+    "radio",
+    "contrast",
+    "planet",
+    "headset",
+];
 
 const stringToHash = (str: string): number => {
     let hash = 0;
@@ -73,7 +84,9 @@ const GenreTag = ({ genre }: GenreTagProps) => {
                 color={selectedPalette.light} // Cor do ícone da paleta
                 style={styles.icon}
             />
-            <Text style={[styles.tagText, { color: selectedPalette.light }]}>{genre.charAt(0).toUpperCase() + genre.slice(1)}</Text>
+            <Text style={[styles.tagText, { color: selectedPalette.light }]}>
+                {genre.charAt(0).toUpperCase() + genre.slice(1)}
+            </Text>
         </View>
     );
 };

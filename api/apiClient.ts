@@ -3,7 +3,11 @@ import axios, { AxiosResponse } from "axios";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
-async function put(route: string, data: any, useAuth: boolean = false): Promise<AxiosResponse | null> {
+async function put(
+    route: string,
+    data: any,
+    useAuth: boolean = false
+): Promise<AxiosResponse | null> {
     try {
         const userToken = await AsyncStorage.getItem("token");
 
@@ -20,7 +24,12 @@ async function put(route: string, data: any, useAuth: boolean = false): Promise<
     }
 }
 
-async function post(route: string, data: any, useAuth: boolean = false, headers: any = {}): Promise<AxiosResponse | null> {
+async function post(
+    route: string,
+    data: any,
+    useAuth: boolean = false,
+    headers: any = {}
+): Promise<AxiosResponse | null> {
     try {
         const userToken = await AsyncStorage.getItem("token");
 

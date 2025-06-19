@@ -2,9 +2,9 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { makeRedirectUri, ResponseType, useAuthRequest } from "expo-auth-session";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../services/AuthService";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "../../api/auth";
 
 export default function Spotify() {
     const redirectUri = makeRedirectUri();
@@ -13,7 +13,15 @@ export default function Spotify() {
         {
             responseType: ResponseType.Code,
             clientId: process.env.EXPO_PUBLIC_SPOTIFY_ID,
-            scopes: ["user-library-read", "user-library-modify", "user-read-email", "user-top-read", "playlist-read-private", "playlist-modify-public", "playlist-modify-private"],
+            scopes: [
+                "user-library-read",
+                "user-library-modify",
+                "user-read-email",
+                "user-top-read",
+                "playlist-read-private",
+                "playlist-modify-public",
+                "playlist-modify-private",
+            ],
             redirectUri: redirectUri,
             usePKCE: false,
         },
@@ -60,11 +68,20 @@ export default function Spotify() {
             <SafeAreaView style={styles.container}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>harmony.</Text>
-                    <Text style={styles.legend}>Utilizamos Spotify para sincronizar suas músicas favoritas!</Text>
+                    <Text style={styles.legend}>
+                        Utilizamos Spotify para sincronizar suas músicas favoritas!
+                    </Text>
                 </View>
 
-                <TouchableOpacity style={styles.spotifyButton} disabled={!request || disabled} onPress={() => promptAsync()}>
-                    <Image source={require("../../assets/icons/spotify.png")} style={styles.spotifyImage} />
+                <TouchableOpacity
+                    style={styles.spotifyButton}
+                    disabled={!request || disabled}
+                    onPress={() => promptAsync()}
+                >
+                    <Image
+                        source={require("../../assets/icons/spotify.png")}
+                        style={styles.spotifyImage}
+                    />
                     <Text style={styles.spotifyText}>Entrar com Spotify</Text>
                 </TouchableOpacity>
             </SafeAreaView>

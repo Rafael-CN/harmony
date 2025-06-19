@@ -1,13 +1,13 @@
-import { useAxios } from "./AxiosService";
+import { useAxios } from "./apiClient";
 
-const { post, get } = useAxios();
+const axios = useAxios();
 
 export interface AuthResponse {
     token: string;
     succeeded: boolean;
 }
 async function login(username: string, password: string): Promise<AuthResponse> {
-    const response = await post("user/login", { username, password });
+    const response = await axios.post("user/login", { username, password });
 
     return {
         token: response?.data.token,
@@ -16,7 +16,7 @@ async function login(username: string, password: string): Promise<AuthResponse> 
 }
 
 async function register(username: string, password: string): Promise<any> {
-    const response = await post("user/register", { username, password });
+    const response = await axios.post("user/register", { username, password });
 
     return {
         errors: response?.data.errors,
@@ -25,17 +25,17 @@ async function register(username: string, password: string): Promise<any> {
 }
 
 async function isLoggedIn(): Promise<boolean> {
-    const response = await get("user/logged-in", true);
+    const response = await axios.get("user/logged-in", true);
     return response?.data.isLoggedIn;
 }
 
 async function isLinkedSpotify(): Promise<boolean> {
-    const response = await get("user/spotify/isLinked", true);
+    const response = await axios.get("user/spotify/isLinked", true);
     return response?.data.isLinked;
 }
 
 async function linkSpotify(authCode: string): Promise<boolean> {
-    const response = await post("user/spotify/link", { authCode }, true);
+    const response = await axios.post("user/spotify/link", { authCode }, true);
     return response?.status === 200;
 }
 

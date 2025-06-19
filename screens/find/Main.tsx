@@ -1,170 +1,226 @@
-import { useEffect, useRef, useState } from "react";
-import { useAnimatedValue, Animated, StyleSheet, View, PanResponder } from "react-native";
-import { Span, IconButton } from "../../components";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { StyleSheet, View, Text, TouchableOpacity, Dimensions } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { color } from "../../theme.json";
+import { useNavigation } from "@react-navigation/native";
+
+const { width } = Dimensions.get("window");
+
+interface NavigationCardProps {
+    title: string;
+    subtitle: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    gradientColors: string[];
+    onPress: () => void;
+    delay?: number;
+}
+
+const NavigationCard = ({
+    title,
+    subtitle,
+    icon,
+    gradientColors,
+    onPress,
+    delay = 0,
+}: NavigationCardProps) => {
+    return (
+        <TouchableOpacity style={styles.cardContainer} onPress={onPress} activeOpacity={0.8}>
+            <LinearGradient
+                colors={gradientColors as any}
+                style={styles.card}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            >
+                <View style={styles.cardContent}>
+                    <View style={styles.iconContainer}>
+                        <Ionicons name={icon} size={32} color={color.extraLight} />
+                    </View>
+
+                    <View style={styles.textContainer}>
+                        <Text style={styles.cardTitle}>{title}</Text>
+                        <Text style={styles.cardSubtitle}>{subtitle}</Text>
+                    </View>
+
+                    <View style={styles.arrowContainer}>
+                        <Ionicons name="chevron-forward" size={24} color={color.light} />
+                    </View>
+                </View>
+            </LinearGradient>
+        </TouchableOpacity>
+    );
+};
 
 export default function Main() {
-    const musicButtonRef = useRef<View>(null);
-    const peopleButtonRef = useRef<View>(null);
-    const [buttonPositions, setButtonPositions] = useState({
-        music: { x: 0, y: 0 },
-        people: { x: 0, y: 0 },
-    });
-
-    const doActiveButton = (x: number, y: number) => {
-        const musicDistance = Math.sqrt(Math.pow(x - buttonPositions.music.x, 2) + Math.pow(y - buttonPositions.music.y, 2));
-        const peopleDistance = Math.sqrt(Math.pow(x - buttonPositions.people.x, 2) + Math.pow(y - buttonPositions.people.y, 2));
-
-        if (musicDistance < peopleDistance) {
-            handleActive("music");
-        } else {
-            handleActive("person");
-        }
-    };
-
-    const panResponder = PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderMove: (evt, gestureState) => {
-            const { moveX, moveY } = gestureState;
-            doActiveButton(moveX, moveY);
-        },
-        onPanResponderRelease: () => {
-            if (active.music) {
-                handleActive("none");
-                navigation.navigate("FindMusic" as never);
-            } else if (active.person) {
-                handleActive("none");
-                navigation.navigate("FindPeople" as never);
-            }
-        },
-    });
-
-    const buttonAnim = {
-        gap: useAnimatedValue(0),
-        margin: useAnimatedValue(0),
-    };
-
-    const doButtonAnim = (reverse = false) => {
-        return new Promise((resolve) => {
-            Animated.parallel([
-                Animated.spring(buttonAnim.gap, {
-                    toValue: reverse ? 0 : 50,
-                    friction: 5,
-                    useNativeDriver: false,
-                }),
-                Animated.spring(buttonAnim.margin, {
-                    toValue: reverse ? 75 : 150,
-                    friction: 5,
-                    useNativeDriver: false,
-                }),
-            ]).start(resolve);
-        });
-    };
-
-    useEffect(() => {
-        buttonAnim.gap.setValue(0);
-        buttonAnim.margin.setValue(75);
-
-        doButtonAnim();
-
-        const getButtonPositions = () => {
-            musicButtonRef.current?.measure((x, y, width, height, pageX, pageY) => {
-                setButtonPositions((prev) => ({
-                    ...prev,
-                    music: { x: pageX + width / 2, y: pageY + height / 2 },
-                }));
-            });
-
-            peopleButtonRef.current?.measure((x, y, width, height, pageX, pageY) => {
-                setButtonPositions((prev) => ({
-                    ...prev,
-                    people: { x: pageX + width / 2, y: pageY + height / 2 },
-                }));
-            });
-        };
-
-        setTimeout(getButtonPositions, 100);
-    }, []);
-
-    const descriptionAnim = {
-        opacity: useAnimatedValue(0),
-    };
-
-    const [active, setActive] = useState({ music: false, person: false });
-
-    const handleActive = (type: "music" | "person" | "none") => {
-        setActive({ music: false, person: false, [type]: true });
-
-        if (type !== "none") {
-            Animated.timing(descriptionAnim.opacity, {
-                toValue: 1,
-                duration: 150,
-                useNativeDriver: false,
-            }).start();
-        }
-    };
-
     const navigation = useNavigation();
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener("beforeRemove", async (e) => {
-            e.preventDefault();
-            doButtonAnim(true);
-            setTimeout(() => {
-                navigation.dispatch(e.data.action);
-            }, 125);
-        });
+    const handleNavigateToFindPeople = () => {
+        navigation.navigate("FindPeople" as never);
+    };
 
-        return () => unsubscribe();
-    }, [navigation]);
+    const handleNavigateToFindMusic = () => {
+        navigation.navigate("FindMusic" as never);
+    };
 
     return (
-        <Animated.View style={style.container} {...panResponder.panHandlers}>
-            <Animated.View style={[style.description, { opacity: descriptionAnim.opacity }]}>
-                <Span style={style.backdrop} fontSize={28}>
-                    Encontre novas{" "}
-                    <Span fontSize={28} bold>
-                        {active.music ? "músicas." : "pessoas."}
-                    </Span>
-                </Span>
-                <Span style={style.backdrop}>{active.music ? "que combinem com seu gosto musical" : "que escutam estilos parecidos com seus"}</Span>
-            </Animated.View>
+        <LinearGradient colors={["#000000", color.extraDark]} style={styles.container}>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Descobrir</Text>
+                    <Text style={styles.headerSubtitle}>
+                        Encontre novas músicas e pessoas que combinam com seu gosto musical
+                    </Text>
+                </View>
 
-            <Animated.View style={[style.buttonGroup, { gap: buttonAnim.gap, marginBottom: buttonAnim.margin }]}>
-                <View ref={musicButtonRef}>
-                    <IconButton size={30} name="musical-notes" active={active.music} />
+                <View style={styles.cardsContainer}>
+                    <NavigationCard
+                        title="Descobrir Pessoas"
+                        subtitle="Conecte-se com pessoas que têm gostos musicais similares"
+                        icon="people"
+                        gradientColors={[color.extraDark, color.dark]}
+                        onPress={handleNavigateToFindPeople}
+                    />
+
+                    <NavigationCard
+                        title="Descobrir Músicas"
+                        subtitle="Explore novas músicas baseadas nas suas preferências"
+                        icon="musical-notes"
+                        gradientColors={[color.extraDark, color.dark]}
+                        onPress={handleNavigateToFindMusic}
+                        delay={100}
+                    />
                 </View>
-                <View ref={peopleButtonRef}>
-                    <IconButton size={30} name="person" active={active.person} />
+
+                <View style={styles.infoContainer}>
+                    <View style={styles.infoItem}>
+                        <Ionicons name="heart" size={20} color="#D6677F" />
+                        <Text style={styles.infoText}>Deslize para a direita para curtir</Text>
+                    </View>
+
+                    <View style={styles.infoItem}>
+                        <Ionicons name="close" size={20} color={color.light} />
+                        <Text style={styles.infoText}>Deslize para a esquerda para pular</Text>
+                    </View>
                 </View>
-            </Animated.View>
-        </Animated.View>
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#000000aa",
-        alignItems: "center",
     },
 
-    backdrop: {
-        backgroundColor: "#000000aa",
-        borderRadius: 20,
-    },
-
-    description: {
+    safeArea: {
         flex: 1,
-        justifyContent: "flex-end",
-        alignItems: "center",
-        marginTop: 75,
+        paddingHorizontal: 20,
     },
 
-    buttonGroup: {
+    header: {
+        marginTop: 40,
+        marginBottom: 40,
+        alignItems: "center",
+    },
+
+    headerTitle: {
+        color: color.extraLight,
+        fontSize: 32,
+        fontFamily: "Nexa-Heavy",
+        marginBottom: 10,
+    },
+
+    headerSubtitle: {
+        color: color.light,
+        fontSize: 16,
+        fontFamily: "Nexa-Light",
+        textAlign: "center",
+        lineHeight: 22,
+        opacity: 0.8,
+    },
+
+    cardsContainer: {
+        flex: 1,
+        justifyContent: "center",
+        gap: 20,
+    },
+
+    cardContainer: {
+        width: "100%",
+        height: 120,
+        marginBottom: 15,
+    },
+
+    card: {
+        flex: 1,
+        borderRadius: 16,
+        padding: 20,
+        elevation: 8,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+
+    cardContent: {
         flex: 1,
         flexDirection: "row",
-        alignItems: "flex-end",
+        alignItems: "center",
+    },
+
+    iconContainer: {
+        width: 60,
+        height: 60,
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: 30,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 15,
+    },
+
+    textContainer: {
+        flex: 1,
+        paddingRight: 10,
+    },
+
+    cardTitle: {
+        color: color.extraLight,
+        fontSize: 18,
+        fontFamily: "Nexa-Bold",
+        marginBottom: 5,
+    },
+
+    cardSubtitle: {
+        color: color.light,
+        fontSize: 14,
+        fontFamily: "Nexa-Light",
+        lineHeight: 18,
+        opacity: 0.9,
+    },
+
+    arrowContainer: {
+        opacity: 0.7,
+    },
+
+    infoContainer: {
+        marginBottom: 30,
+        gap: 15,
+    },
+
+    infoItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+    },
+
+    infoText: {
+        color: color.light,
+        fontSize: 14,
+        fontFamily: "Nexa-Light",
+        opacity: 0.8,
     },
 });

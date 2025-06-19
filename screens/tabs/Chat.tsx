@@ -1,9 +1,10 @@
-import { Background, Span } from "../../components";
+import { LinearGradient } from "expo-linear-gradient";
+import { Text } from "react-native";
 
 export default function Chat() {
     return (
-        <Background>
-            <Span>Chat</Span>
-        </Background>
+        <LinearGradient colors={["#000000", "#000000"]} style={{ flex: 1 }}>
+            <Text>Chat</Text>
+        </LinearGradient>
     );
 }

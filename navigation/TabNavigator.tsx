@@ -7,6 +7,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { transform } from "@babel/core";
 import FindNavigator from "./FindNavigator";
+import { ProfileProvider } from "../context/ProfileContext";
+import { AudioProvider } from "../context/AudioContext";
 
 interface TabIconProps {
     name: keyof typeof Ionicons.glyphMap;
@@ -42,8 +44,16 @@ const AnimatedTabBarButton = ({ children, onPress, ...props }: BottomTabBarButto
     };
 
     return (
-        <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut} {...(props as any)} android_ripple={{ color: "transparent" }}>
-            <Animated.View style={[styles.tabBarIconStyle, animatedStyle]}>{children}</Animated.View>
+        <Pressable
+            onPress={onPress}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            {...(props as any)}
+            android_ripple={{ color: "transparent" }}
+        >
+            <Animated.View style={[styles.tabBarIconStyle, animatedStyle]}>
+                {children}
+            </Animated.View>
         </Pressable>
     );
 };
@@ -53,55 +63,89 @@ export default function TabNavigator() {
 
     return (
         <View style={{ flex: 1 }}>
-            <Tab.Navigator
-                screenOptions={{
-                    headerShown: false,
-                    tabBarStyle: styles.tabBar,
-                    tabBarShowLabel: false,
-                    tabBarIconStyle: styles.tabBarIconStyle,
-                    tabBarActiveTintColor: color.light,
-                    tabBarInactiveTintColor: color.regular,
-                    tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
-                }}
-            >
-                <Tab.Screen
-                    name="Home"
-                    component={Home}
-                    options={{
-                        tabBarIcon: ({ color, focused }) => <CustomTabIcon name={focused ? "home" : "home-outline"} focused={focused} iconColor={color} />,
-                    }}
-                />
-                <Tab.Screen
-                    name="Search"
-                    component={Search}
-                    options={{
-                        tabBarIcon: ({ color, focused }) => <CustomTabIcon name={focused ? "search" : "search-outline"} focused={focused} iconColor={color} />,
-                    }}
-                />
+            <AudioProvider>
+                <ProfileProvider>
+                    <Tab.Navigator
+                        screenOptions={{
+                            headerShown: false,
+                            tabBarStyle: styles.tabBar,
+                            tabBarShowLabel: false,
+                            tabBarIconStyle: styles.tabBarIconStyle,
+                            tabBarActiveTintColor: color.light,
+                            tabBarInactiveTintColor: color.regular,
+                            tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
+                        }}
+                    >
+                        <Tab.Screen
+                            name="Home"
+                            component={Home}
+                            options={{
+                                tabBarIcon: ({ color, focused }) => (
+                                    <CustomTabIcon
+                                        name={focused ? "home" : "home-outline"}
+                                        focused={focused}
+                                        iconColor={color}
+                                    />
+                                ),
+                            }}
+                        />
+                        <Tab.Screen
+                            name="Search"
+                            component={Search}
+                            options={{
+                                tabBarIcon: ({ color, focused }) => (
+                                    <CustomTabIcon
+                                        name={focused ? "search" : "search-outline"}
+                                        focused={focused}
+                                        iconColor={color}
+                                    />
+                                ),
+                            }}
+                        />
 
-                <Tab.Screen
-                    name="Discover"
-                    component={FindNavigator}
-                    options={{
-                        tabBarIcon: ({ color, focused }) => <CustomTabIcon name={focused ? "heart" : "heart-outline"} focused={focused} iconColor={color} />,
-                    }}
-                />
+                        <Tab.Screen
+                            name="Discover"
+                            component={FindNavigator}
+                            options={{
+                                tabBarIcon: ({ color, focused }) => (
+                                    <CustomTabIcon
+                                        name={focused ? "heart" : "heart-outline"}
+                                        focused={focused}
+                                        iconColor={color}
+                                    />
+                                ),
+                            }}
+                        />
 
-                <Tab.Screen
-                    name="Chat"
-                    component={Chat}
-                    options={{
-                        tabBarIcon: ({ color, focused }) => <CustomTabIcon name={focused ? "chatbox" : "chatbox-outline"} focused={focused} iconColor={color} />,
-                    }}
-                />
-                <Tab.Screen
-                    name="Profile"
-                    component={Profile}
-                    options={{
-                        tabBarIcon: ({ color, focused }) => <CustomTabIcon name={focused ? "person" : "person-outline"} focused={focused} iconColor={color} />,
-                    }}
-                />
-            </Tab.Navigator>
+                        <Tab.Screen
+                            name="Chat"
+                            component={Chat}
+                            options={{
+                                tabBarIcon: ({ color, focused }) => (
+                                    <CustomTabIcon
+                                        name={focused ? "chatbox" : "chatbox-outline"}
+                                        focused={focused}
+                                        iconColor={color}
+                                    />
+                                ),
+                            }}
+                        />
+                        <Tab.Screen
+                            name="Profile"
+                            component={Profile}
+                            options={{
+                                tabBarIcon: ({ color, focused }) => (
+                                    <CustomTabIcon
+                                        name={focused ? "person" : "person-outline"}
+                                        focused={focused}
+                                        iconColor={color}
+                                    />
+                                ),
+                            }}
+                        />
+                    </Tab.Navigator>
+                </ProfileProvider>
+            </AudioProvider>
         </View>
     );
 }

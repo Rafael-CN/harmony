@@ -1,118 +1,23 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { color } from "../../theme.json";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ProfileData, useUser } from "../../services/UserService";
 import { useEffect, useState } from "react";
-import { Image } from "expo-image";
-import { ProfileEditModal } from "../../components/profile";
-import { Artist, useMusic } from "../../services/MusicService";
-import ArtistListItem from "../../components/profile/ArtistListItem";
-import GenreTag from "../../components/profile/GenreTag";
-
-const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit: () => void }) => {
-    const styles = StyleSheet.create({
-        profileContainer: {
-            paddingHorizontal: 25,
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 30,
-            marginBottom: 10,
-        },
-
-        profileImage: {
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            marginRight: 25,
-        },
-
-        profileInfo: {
-            flex: 1,
-        },
-
-        profileNameContainer: {
-            flexDirection: "row",
-            alignItems: "center",
-        },
-
-        profileName: {
-            color: color.extraLight,
-            fontSize: 26,
-            fontFamily: "Nexa-Heavy",
-            marginRight: "auto",
-        },
-
-        profileEdit: {
-            padding: 10,
-            marginStart: 10,
-            backgroundColor: color.extraDark,
-            borderRadius: 50,
-        },
-
-        profileEditIcon: {
-            color: color.extraLight,
-            fontSize: 20,
-        },
-
-        profileUsername: {
-            color: color.extraLight,
-            opacity: 0.5,
-            fontSize: 14,
-            fontFamily: "Nexa-Light",
-        },
-
-        profileBio: {
-            color: color.extraLight,
-            fontSize: 14,
-            fontFamily: "Nexa-Light",
-            marginTop: 10,
-        },
-    });
-
-    const userService = useUser();
-    const [username, setUsername] = useState("");
-
-    useEffect(() => {
-        userService.getUsername().then(setUsername);
-    }, []);
-
-    const imageSource = profile?.profilePictureUrl ? { uri: profile.profilePictureUrl } : require("../../assets/users/1.png");
-
-    return (
-        <View style={styles.profileContainer}>
-            <Image source={imageSource} style={styles.profileImage} priority={"high"} />
-            <View style={styles.profileInfo}>
-                <View style={styles.profileNameContainer}>
-                    <Text style={styles.profileName}>{profile?.displayName}</Text>
-
-                    <TouchableOpacity style={styles.profileEdit} onPress={onEdit}>
-                        <Ionicons style={styles.profileEditIcon} name="create-outline"></Ionicons>
-                    </TouchableOpacity>
-                </View>
-                <Text style={styles.profileUsername}>@{username}</Text>
-                <Text style={styles.profileBio}>{profile?.bio}</Text>
-            </View>
-        </View>
-    );
-};
+import { ArtistListItem, GenreTag, ProfileEditModal, ProfileInfo } from "../../components/profile";
+import { Artist, ProfileData } from "../../types";
+import { useMusic } from "../../api";
+import { useProfile } from "../../hooks/useProfile";
 
 export default function Profile() {
-    const userService = useUser();
     const musicService = useMusic();
 
+    const { profile, fetchProfile } = useProfile();
     const [visible, setVisible] = useState(false);
-    const [profile, setProfile] = useState<ProfileData | null>(null);
 
     const [topArtists, setTopArtists] = useState<Array<Artist>>([]);
 
-    useEffect(() => {
-        userService.getProfile().then(setProfile);
-    }, []);
-
     const handleSaveProfile = (editedData: ProfileData) => {
-        setProfile(editedData);
+        fetchProfile();
         setVisible(false);
         console.log("Perfil salvo com sucesso!");
     };
@@ -130,7 +35,12 @@ export default function Profile() {
     return (
         <LinearGradient colors={["#000000", color.extraDark]} style={styles.container}>
             <SafeAreaView style={styles.container}>
-                <ProfileEditModal profile={profile} visible={visible} setVisible={setVisible} onSave={handleSaveProfile} />
+                <ProfileEditModal
+                    profile={profile}
+                    visible={visible}
+                    setVisible={setVisible}
+                    onSave={handleSaveProfile}
+                />
                 <ProfileInfo profile={profile} onEdit={() => setVisible(true)} />
 
                 <View style={styles.stats}>
@@ -162,7 +72,17 @@ export default function Profile() {
                 <View style={styles.sectionContainer}>
                     <Text style={styles.sectionTitle}>Artistas favoritos</Text>
 
-                    <View style={styles.artistListContainer}>{topArtists.length > 0 ? topArtists.map((artist, i) => <ArtistListItem key={artist.id} artist={artist} rank={i + 1} />) : <Text style={styles.emptyStateText}>Ouça mais músicas para ver seus artistas favoritos aqui!</Text>}</View>
+                    <View style={styles.artistListContainer}>
+                        {topArtists.length > 0 ? (
+                            topArtists.map((artist, i) => (
+                                <ArtistListItem key={artist.id} artist={artist} rank={i + 1} />
+                            ))
+                        ) : (
+                            <Text style={styles.emptyStateText}>
+                                Ouça mais músicas para ver seus artistas favoritos aqui!
+                            </Text>
+                        )}
+                    </View>
                 </View>
             </SafeAreaView>
         </LinearGradient>

@@ -1,79 +1,97 @@
-import { Animated, Dimensions, Image, ImageBackground, ImageSourcePropType, PanResponder, StyleSheet, View } from "react-native";
-import { color } from "../../theme.json";
-import { Background, Span } from "../../components";
+import { useEffect, useState } from "react";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useRef, useState } from "react";
-import { getRandomMusic, Music } from "../../context/Music";
-import { getRandomIndex } from "../../context/Utils";
-import { User, getRandomUsers } from "../../context/User";
 import SwipeCard from "./SwipeCard";
+import { useDiscovery } from "../../api/discovery";
+import { RecommendedUser } from "../../types";
+import { color } from "../../theme.json";
+
+const UserCard = ({ user }: { user: RecommendedUser }) => {
+    const imageSource = user.profilePictureUrl
+        ? { uri: user.profilePictureUrl }
+        : require("../../assets/users/default.png");
+
+    return (
+        <ImageBackground source={imageSource} style={{ flex: 1 }}>
+            <LinearGradient
+                style={style.cardBackground}
+                colors={["#00000000", color.extraDark + "BB"]}
+            >
+                <View style={style.textOverlay}>
+                    <View>
+                        <Text
+                            style={{
+                                color: color.extraLight,
+                                fontFamily: "Nexa-Heavy",
+                                fontSize: 36,
+                            }}
+                        >
+                            {user.displayName}
+                        </Text>
+                        {user.bio && (
+                            <Text
+                                style={{
+                                    color: color.extraLight,
+                                    fontFamily: "Nexa-Light",
+                                    maxWidth: 200,
+                                }}
+                            >
+                                {user.bio}
+                            </Text>
+                        )}
+                    </View>
+                    <View style={style.ageInfo}>
+                        <Text
+                            style={{
+                                color: color.extraLight,
+                                fontFamily: "Nexa-Heavy",
+                                fontSize: 22,
+                            }}
+                        >
+                            {`${Math.round(user.compatibilityScore * 100)}%`}
+                        </Text>
+                        <Text style={{ color: color.extraLight, fontFamily: "Nexa-Light" }}>
+                            Compatível
+                        </Text>
+                    </View>
+                </View>
+            </LinearGradient>
+        </ImageBackground>
+    );
+};
 
 export default function FindPeople() {
-    const [users, setUsers] = useState<Array<User>>(getRandomUsers(5));
+    const [users, setUsers] = useState<RecommendedUser[]>([]);
+    const [page, setPage] = useState(1);
+    const discoveryApi = useDiscovery();
 
-    const [randomSong, setRandomSong] = useState<Music>();
-    const [userIndex, setUserIndex] = useState(0);
+    const fetchUsers = async () => {
+        const newUsers = await discoveryApi.getRecommendedUsers(page);
+        setUsers((prev) => [...prev, ...newUsers]);
+        setPage((prev) => prev + 1);
+    };
 
     useEffect(() => {
-        getRandomMusic().then(setRandomSong);
+        fetchUsers();
     }, []);
 
     const handleSwipe = (direction: "left" | "right", resetCard: () => void) => {
-        getRandomMusic().then((song) => {
-            setRandomSong(song);
-            setUserIndex(getRandomIndex(users.length));
+        setUsers((prev) => prev.slice(1));
 
-            setTimeout(() => {
-                resetCard();
-            }, 50);
-        });
+        if (users.length <= 3) {
+            fetchUsers();
+        }
+
+        setTimeout(resetCard, 50);
     };
 
-    const UserCard = ({ ...user }: User) => {
-        return (
-            <ImageBackground source={user.profilePic} style={{ flex: 1 }}>
-                <LinearGradient style={style.cardBackground} colors={["#00000000", color.extraDark + "BB"]}>
-                    <View style={style.music}>
-                        <Image source={{ uri: randomSong?.photo }} style={style.musicAlbum} />
-                        <View style={style.musicInfo}>
-                            <Span color="white" fontSize={11}>
-                                {randomSong?.name}
-                            </Span>
-                            <Span light color="white" fontSize={11}>
-                                {randomSong?.artist}
-                            </Span>
-                        </View>
-                        <Image source={require("../../assets/playing.png")} style={style.equalizer} />
-                    </View>
-                    <View style={style.textOverlay}>
-                        <View>
-                            <Span color="white" bold fontSize={36}>
-                                {user.name}
-                            </Span>
-                            <Span color="white" light style={{ maxWidth: 200 }}>
-                                {user.bio}
-                            </Span>
-                        </View>
-                        <View style={style.ageInfo}>
-                            <Span color="white" light>
-                                Idade
-                            </Span>
-                            <Span bold color="white" fontSize={36}>
-                                {user.age}
-                            </Span>
-                        </View>
-                    </View>
-                </LinearGradient>
-            </ImageBackground>
-        );
-    };
-
+    const currentUser = users[0];
     return (
-        <Background>
+        <LinearGradient colors={["#000000", color.extraDark]} style={{ flex: 1 }}>
             <SwipeCard onSwipe={handleSwipe}>
-                <UserCard {...users[userIndex]} />
+                {currentUser && <UserCard user={currentUser} />}
             </SwipeCard>
-        </Background>
+        </LinearGradient>
     );
 }
 

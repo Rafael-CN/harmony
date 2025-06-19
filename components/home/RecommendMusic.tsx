@@ -1,13 +1,32 @@
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import { Music } from "../../services/MusicService";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { color } from "../../theme.json";
 import * as Linking from "expo-linking";
+import { Music } from "../../types";
+import { useState } from "react";
+import SkeletonLoader from "../common/SkeletonLoader";
 
 const RecommendMusic = ({ music }: { music: Music }) => {
+    const [isLoading, setIsLoading] = useState(true);
+
     return (
-        <TouchableOpacity key={music.name} style={styles.musicContainer} onPress={() => Linking.openURL(music.linkUrl)}>
-            <Image source={{ uri: music.imageUrl }} style={styles.musicCover} priority={"high"} />
+        <TouchableOpacity
+            key={music.name}
+            style={styles.musicContainer}
+            onPress={() => Linking.openURL(music.linkUrl)}
+        >
+            <View style={styles.musicCoverContainer}>
+                <Image
+                    source={{ uri: music.mediumImageUrl }}
+                    style={styles.musicCover}
+                    priority={"high"}
+                    cachePolicy={"memory-disk"}
+                    onLoadEnd={() => setIsLoading(false)}
+                />
+
+                {isLoading && <SkeletonLoader style={styles.musicCover} />}
+            </View>
+
             <Text style={styles.musicName} numberOfLines={1}>
                 {music.name}
             </Text>
@@ -26,11 +45,19 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
     },
-    musicCover: {
+    musicCoverContainer: {
         width: 100,
         height: 100,
         borderRadius: 10,
+        overflow: "hidden",
     },
+
+    musicCover: {
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+    },
+
     musicName: {
         marginTop: 15,
         fontFamily: "Nexa-Bold",

@@ -2,11 +2,11 @@ import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../services/AuthService";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
+import { useAuth } from "../../api/auth";
 
 export default function Login() {
     const navigator = useNavigation();
@@ -53,12 +53,28 @@ export default function Login() {
                         <Text style={styles.title}>harmony.</Text>
                         <Text style={styles.legend}>Onde você se sintoniza com todos!</Text>
                     </View>
-                    <TextInput style={styles.input} placeholder="Nome do usuário" placeholderTextColor={color.light} onChangeText={(value) => setUser({ ...user, name: value })}></TextInput>
-                    <TextInput style={styles.input} placeholder="Senha" placeholderTextColor={color.light} onChangeText={(value) => setUser({ ...user, password: value })} secureTextEntry autoCapitalize="none"></TextInput>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Nome do usuário"
+                        placeholderTextColor={color.light}
+                        onChangeText={(value) => setUser({ ...user, name: value })}
+                    ></TextInput>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Senha"
+                        placeholderTextColor={color.light}
+                        onChangeText={(value) => setUser({ ...user, password: value })}
+                        secureTextEntry
+                        autoCapitalize="none"
+                    ></TextInput>
 
                     {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
 
-                    <TouchableOpacity style={[styles.button, signingIn && styles.buttonDisabled]} onPress={handleSigningIn} disabled={signingIn}>
+                    <TouchableOpacity
+                        style={[styles.button, signingIn && styles.buttonDisabled]}
+                        onPress={handleSigningIn}
+                        disabled={signingIn}
+                    >
                         <Text style={styles.buttonText}>Entrar</Text>
                     </TouchableOpacity>
                     <Pressable style={styles.link} onPress={goToRegister}>

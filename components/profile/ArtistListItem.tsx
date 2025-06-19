@@ -1,9 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Artist } from "../../services/MusicService";
 import { color } from "../../theme.json";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
+import { Artist } from "../../types";
 
 interface ArtistListItemProps {
     artist: Artist;
@@ -19,7 +19,10 @@ const ArtistListItem = ({ artist, rank }: ArtistListItemProps) => {
                 <Text style={styles.artistRank}>Top #{rank}</Text>
             </View>
 
-            <TouchableOpacity style={styles.buttonLink} onPress={() => Linking.openURL(artist.linkUrl)}>
+            <TouchableOpacity
+                style={styles.buttonLink}
+                onPress={() => Linking.openURL(artist.linkUrl)}
+            >
                 <Ionicons name="open-outline" style={styles.buttonLinkIcon} />
             </TouchableOpacity>
         </View>
@@ -66,11 +69,14 @@ const styles = StyleSheet.create({
     buttonLink: {
         padding: 10,
         borderRadius: 50,
-        backgroundColor: color.dark,
+        backgroundColor: color.extraDark,
+        borderWidth: 1,
+        borderColor: color.regular,
     },
+
     buttonLinkIcon: {
-        color: color.extraLight,
         fontSize: 20,
+        color: color.regular,
     },
 });
 

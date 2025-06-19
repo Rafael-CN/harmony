@@ -1,12 +1,21 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
-import { Music, useMusic } from "../../services/MusicService";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
+import { Music } from "../../types";
+import { useMusic } from "../../api/music";
 
 const LikedMusic = ({ music }: { music: Music }) => {
     const styles = StyleSheet.create({
@@ -65,7 +74,11 @@ const LikedMusic = ({ music }: { music: Music }) => {
     return (
         <View style={styles.songContainer}>
             <View style={styles.songInfoContainer}>
-                <Image source={{ uri: music.imageUrl }} style={styles.songCover} priority={"high"} />
+                <Image
+                    source={{ uri: music.smallImageUrl }}
+                    style={styles.songCover}
+                    priority={"high"}
+                />
                 <View style={styles.songInfo}>
                     <Text style={styles.songTitle} numberOfLines={1}>
                         {music.name}
@@ -74,7 +87,10 @@ const LikedMusic = ({ music }: { music: Music }) => {
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.songLink} onPress={() => Linking.openURL(music.linkUrl)}>
+            <TouchableOpacity
+                style={styles.songLink}
+                onPress={() => Linking.openURL(music.linkUrl)}
+            >
                 <Ionicons name="open-outline" style={styles.songLinkIcon} />
             </TouchableOpacity>
         </View>
@@ -120,7 +136,14 @@ export default function Search() {
             <SafeAreaView style={styles.container}>
                 <View style={styles.searchSection}>
                     <Ionicons name="search-outline" size={24} color={textColor}></Ionicons>
-                    <TextInput ref={inputRef} style={styles.search} onChangeText={setSearch} onSubmitEditing={handleSearch} placeholderTextColor={textColor} placeholder="Digite para pesquisar..." />
+                    <TextInput
+                        ref={inputRef}
+                        style={styles.search}
+                        onChangeText={setSearch}
+                        onSubmitEditing={handleSearch}
+                        placeholderTextColor={textColor}
+                        placeholder="Digite para pesquisar..."
+                    />
                 </View>
 
                 <View style={styles.searchResultsContainer}>

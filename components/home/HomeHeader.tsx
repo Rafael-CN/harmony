@@ -1,18 +1,25 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ProfileData } from "../../services/UserService";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
+import { ProfileData } from "../../types";
 
 const HomeHeader = ({ profile }: { profile: ProfileData | null }) => {
     const navigator = useNavigation();
 
-    const imageSource = profile?.profilePictureUrl ? { uri: profile.profilePictureUrl } : require("../../assets/users/1.png");
+    const imageSource = profile?.profilePictureUrl
+        ? { uri: profile.profilePictureUrl }
+        : require("../../assets/users/1.png");
 
     return (
-        <LinearGradient colors={["#1B1B28", "#000000"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.header}>
+        <LinearGradient
+            colors={["#1B1B28", "#000000"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.header}
+        >
             <View style={styles.headerUser}>
                 <Image style={styles.userImage} source={imageSource} priority={"high"} />
                 <View style={styles.headerUserInfo}>
@@ -22,7 +29,10 @@ const HomeHeader = ({ profile }: { profile: ProfileData | null }) => {
             </View>
 
             <View style={styles.headerIcons}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => navigator.navigate("Search" as never)}>
+                <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={() => navigator.navigate("Search" as never)}
+                >
                     <Ionicons name="search-outline" style={styles.icon} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton}>
@@ -84,6 +94,19 @@ const styles = StyleSheet.create({
     icon: {
         fontSize: 20,
         color: color.extraLight,
+    },
+
+    buttonLink: {
+        padding: 10,
+        borderRadius: 50,
+        backgroundColor: color.extraDark,
+        borderWidth: 1,
+        borderColor: color.regular,
+    },
+
+    buttonLinkIcon: {
+        fontSize: 20,
+        color: color.regular,
     },
 });
 

@@ -2,10 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
-import { useAuth } from "../../services/AuthService";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
+import { useAuth } from "../../api/auth";
 
 export default function Register() {
     const navigator = useNavigation();
@@ -42,11 +42,31 @@ export default function Register() {
                         <Text style={styles.legend}>Onde você se sintoniza com todos!</Text>
                     </View>
 
-                    <TextInput style={styles.input} placeholder="Nome do usuário" placeholderTextColor={color.light} onChangeText={(value) => setUser({ ...user, username: value })}></TextInput>
-                    <TextInput style={styles.input} placeholder="Email" placeholderTextColor={color.light}></TextInput>
-                    <TextInput style={styles.input} placeholder="Senha" placeholderTextColor={color.light} secureTextEntry autoCapitalize="none" onChangeText={(value) => setUser({ ...user, password: value })}></TextInput>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Nome do usuário"
+                        placeholderTextColor={color.light}
+                        onChangeText={(value) => setUser({ ...user, username: value })}
+                    ></TextInput>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Email"
+                        placeholderTextColor={color.light}
+                    ></TextInput>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Senha"
+                        placeholderTextColor={color.light}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        onChangeText={(value) => setUser({ ...user, password: value })}
+                    ></TextInput>
 
-                    <TouchableOpacity style={[styles.button, signingUp && styles.buttonDisabled]} onPress={handleSignUp} disabled={signingUp}>
+                    <TouchableOpacity
+                        style={[styles.button, signingUp && styles.buttonDisabled]}
+                        onPress={handleSignUp}
+                        disabled={signingUp}
+                    >
                         <Text style={styles.buttonText}>Cadastrar</Text>
                     </TouchableOpacity>
 
