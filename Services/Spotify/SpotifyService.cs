@@ -1,411 +1,131 @@
-using Microsoft.AspNetCore.Identity;
-using System.Net.Http.Headers;
 using System.Text.Json;
-
-using Harmony.Services.Spotify.DTOs;
 using Harmony.Contracts.Music;
 using Harmony.Models;
-using HtmlAgilityPack;
+using Harmony.Services.Spotify.Components;
+using Harmony.Services.Spotify.DTOs;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Harmony.Services.Spotify
 {
     public class SpotifyService(
 
-        UserManager<User> userManager,
-        IConfiguration configuration,
-        IHttpClientFactory httpClientFactory,
-        ILogger<SpotifyService> logger
+        ISpotifyAuthService authService,
+        ISpotifyApiService apiService,
+        ISpotifyScrapingService scrapingService,
+        IMemoryCache memoryCache
 
     ) : ISpotifyService
     {
-        private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-        {
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        };
+        #region Delegates
 
-        #region Helpers
+        public Task<string?> GetAccessToken(User user) => authService.GetAccessToken(user);
+        public Task<SpotifyToken?> GetToken(string authCode) => authService.GetToken(authCode);
 
-        private string GetBasicHeader()
-        {
-            var basicHeader = configuration["SpotifySettings:ClientId"] + ":" + configuration["SpotifySettings:ClientSecret"];
-            basicHeader = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(basicHeader));
-            return basicHeader;
-        }
+        public Task<MusicDTO?> GetSong(User user, string id) => apiService.GetSong(user, id);
+        public Task<List<MusicDTO>?> GetSongs(User user, IEnumerable<string> ids) => apiService.GetSongs(user, ids);
 
-        private async Task<HttpClient?> ConfigHttpClient(User user)
-        {
-            var accessToken = await GetAccessToken(user);
-            if (accessToken == null) return null;
+        public Task<ArtistDTO?> GetArtist(User user, string id) => apiService.GetArtist(user, id);
+        public Task<List<ArtistDTO>?> GetArtists(User user, IEnumerable<string> ids) => apiService.GetArtists(user, ids);
 
-            var client = httpClientFactory.CreateClient("SpotifyApi");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        public Task<List<MusicDTO>?> GetLastLikedSongs(User user, int limit = 5) => apiService.GetLastLikedSongs(user, limit);
+        public Task<int?> GetLikedSongsCount(User user) => apiService.GetLikedSongsCount(user);
 
-            return client;
-        }
+        public Task<List<MusicDTO>?> GetQuerySongs(User user, string query, int offset = 0) => apiService.GetQuerySongs(user, query, offset);
 
-        public async Task<string?> GetAccessToken(User user)
-        {
-            if (user.Credential == null) return null;
-            if (user.Credential.ExpirationDate > DateTime.UtcNow.AddMinutes(5)) return user.Credential.AccessToken;
-
-            var client = httpClientFactory.CreateClient("SpotifyAuth");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicHeader());
-
-            var response = await client.PostAsync("token", new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "grant_type", "refresh_token" },
-                { "refresh_token", user.Credential.RefreshToken! },
-            }));
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                var token = JsonSerializer.Deserialize<SpotifyToken>(json, _jsonSerializerOptions);
-                if (token == null) return null;
-
-                if (token.RefreshToken != null)
-                {
-                    // user.Credential.RefreshToken = token.RefreshToken;
-                }
-
-                user.Credential.AccessToken = token.AccessToken;
-                user.Credential.ExpirationDate = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
-
-                await userManager.UpdateAsync(user);
-                return token.AccessToken;
-            }
-            else
-            {
-                logger.LogInformation("--> Erro ao pedir token de acesso: {Error}", await response.Content.ReadAsStringAsync());
-                return null;
-            }
-        }
-
-        public async Task<SpotifyToken?> GetToken(string authCode)
-        {
-            var client = httpClientFactory.CreateClient("SpotifyAuth");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetBasicHeader());
-
-            var response = await client.PostAsync("token", new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "code", authCode },
-                { "redirect_uri", configuration["SpotifySettings:RedirectUri"]! },
-                { "grant_type", "authorization_code" },
-            }));
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                var token = JsonSerializer.Deserialize<SpotifyToken>(json, _jsonSerializerOptions);
-                return token;
-            }
-            else
-            {
-                logger.LogInformation("--> Erro ao obter tokens de Spotify: {Error}", await response.Content.ReadAsStringAsync());
-                return null;
-            }
-        }
+        public Task<List<MusicDTO>?> GetTopSongs(User user, int limit = 5) => apiService.GetTopSongs(user, limit);
+        public Task<List<SpotifyArtist>?> GetTopArtists(User user, int limit = 5) => apiService.GetTopArtists(user, limit);
 
         #endregion
 
-        public async Task<MusicDTO?> GetSong(User user, string id)
+        public async Task<List<MusicDTO>?> GetRecommendations(User user, int limit = 5)
         {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
+            var recommendedIds = await GetRecommendationsIds(user, limit);
+            if (recommendedIds == null || !recommendedIds.Any()) return [];
 
-            var response = await client.GetAsync($"tracks/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                var track = JsonSerializer.Deserialize<SpotifyTrack>(json, _jsonSerializerOptions);
-                if (track == null) return null;
-
-                ; return TrackToMusic(track);
-            }
-            else
-            {
-                return null;
-            }
+            return await apiService.GetSongs(user, recommendedIds);
         }
 
-        public async Task<List<MusicDTO>?> GetSongs(User user, IEnumerable<string> ids)
+        public async Task<List<MusicDTO>?> GetRecommendationsFromSeeds(User user, List<string> trackIds, int limit = 5)
         {
-            if (ids == null || !ids.Any()) return null;
+            var recommendedIds = await GetRecommendationsIdsFromSeeds(user, trackIds, limit);
+            if (recommendedIds == null || !recommendedIds.Any()) return [];
 
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var tracksId = string.Join(",", ids.Take(50));
-
-            var response = await client.GetAsync($"tracks?ids={tracksId}");
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            var jsonObject = JsonDocument.Parse(json);
-            var tracksData = jsonObject.RootElement.GetProperty("tracks");
-
-            var tracks = JsonSerializer.Deserialize<List<SpotifyTrack>>(tracksData, _jsonSerializerOptions);
-            if (tracks == null) return [];
-
-            return TracksToMusics(tracks);
+            return await apiService.GetSongs(user, recommendedIds);
         }
 
-        public async Task<ArtistDTO?> GetArtist(User user, string id)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync($"artists/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                var artist = JsonSerializer.Deserialize<SpotifyArtist>(json, _jsonSerializerOptions);
-                if (artist == null) return null;
-
-                return new ArtistDTO
-                {
-                    Id = artist.Id,
-                    Name = artist.Name,
-                    ImageUrl = artist.Images.Last().Url,
-                    LinkUrl = artist.Uri
-                };
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public async Task<List<MusicDTO>?> GetLastLikedSongs(User user, int limit = 5)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync($"me/tracks?limit={limit}");
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyLike>>(json, _jsonSerializerOptions);
-                if (pagedData == null) return [];
-
-                return TracksToMusics(pagedData.Items.Select(i => i.Track).ToList());
-            }
-            else
-            {
-                logger.LogWarning("--> Não foi possível obter as últimas músicas curtidas: {Error}", await response.Content.ReadAsStringAsync());
-                return null;
-            }
-
-        }
-
-        public async Task<List<MusicDTO>?> GetQuerySongs(User user, string query, int offset = 0)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync($"search?q={query}&type=track&offset={offset}");
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-                var jsonObject = JsonDocument.Parse(json);
-                var tracks = jsonObject.RootElement.GetProperty("tracks");
-
-                var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyTrack>>(tracks, _jsonSerializerOptions);
-                if (pagedData == null) return [];
-
-                return TracksToMusics(pagedData.Items);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public async Task<int?> GetLikedSongsCount(User user)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync("me/tracks?limit=1");
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyLike>>(json, _jsonSerializerOptions);
-
-            return pagedData?.Total;
-        }
-
-        public async Task<List<bool>> GetCheckedLikedSongs(User user, List<string> trackIds)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return [];
-
-            var response = await client.GetAsync($"me/tracks/contains?ids={string.Join(",", trackIds)}");
-            if (!response.IsSuccessStatusCode) return [];
-
-            var json = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<List<bool>>(json, _jsonSerializerOptions);
-
-            return data ?? [];
-        }
-
-        #region Top items
-
-        public async Task<List<MusicDTO>?> GetTopSongs(User user, int limit = 5)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync($"me/top/tracks?limit={limit}");
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyTrack>>(json, _jsonSerializerOptions);
-                if (pagedData == null) return [];
-
-                return TracksToMusics(pagedData.Items);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public async Task<List<SpotifyArtist>?> GetTopArtists(User user, int limit = 5)
-        {
-            var client = await ConfigHttpClient(user);
-            if (client == null) return null;
-
-            var response = await client.GetAsync($"me/top/artists?limit={limit}");
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            var pagedData = JsonSerializer.Deserialize<SpotifyPage<SpotifyArtist>>(json, _jsonSerializerOptions);
-            if (pagedData == null) return [];
-
-            return pagedData.Items;
-        }
-
-        #endregion
-
-        public async Task<List<string>?> GetRecommendations(User user)
+        private async Task<List<string>?> GetRecommendationsIds(User user, int limit = 5)
         {
             var topSongs = user.Status?.TopSongs;
             if (topSongs == null || !topSongs.Any()) return null;
 
-            return await GetRecommendations(user, topSongs);
+            var cacheKey = $"recommendations:{user.Id}";
+            if (memoryCache.TryGetValue(cacheKey, out List<string>? cachedRecommendations))
+            {
+                return await FilterUnlikedSongs(user, cachedRecommendations!, limit);
+            }
+
+            var recommendations = await GetRecommendationsIdsFromSeeds(user, topSongs, 50);
+
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromHours(24));
+
+            memoryCache.Set(cacheKey, recommendations, cacheOptions);
+
+            return recommendations?.Take(limit).ToList();
         }
 
-        public async Task<List<string>?> GetRecommendations(User user, List<string> trackIds)
+        private async Task<List<string>?> GetRecommendationsIdsFromSeeds(User user, List<string> trackIds, int limit = 5)
         {
             if (trackIds == null || !trackIds.Any()) return null;
 
-            var tracksUrls = trackIds.Select(id => $"https://open.spotify.com/track/{id}");
+            var tracksUrls = trackIds.Select(id => $"https://open.spotify.com/track/{id}")
+                                    .OrderBy(t => Guid.NewGuid())
+                                    .Take(5);
 
-            var recommendedSongs = await Task.WhenAll(tracksUrls.Select(GetScrapedRecommendations));
+            var recommendedSongs = await Task.WhenAll(tracksUrls.Select(scrapingService.GetScrapedRecommendations));
 
             var recommendedUrls = recommendedSongs
                                     .SelectMany(i => i)
                                     .Distinct()
                                     .Select(id => $"https://open.spotify.com/track/{id}")
                                     .OrderBy(i => Guid.NewGuid())
-                                    .Take(10);
+                                    .Take(5);
 
-            recommendedSongs = await Task.WhenAll(recommendedUrls.Select(GetScrapedRecommendations));
+            recommendedSongs = await Task.WhenAll(recommendedUrls.Select(scrapingService.GetScrapedRecommendations));
 
-            var randomizedSongs = recommendedSongs.SelectMany(i => i).Distinct().Take(50);
-
-            var checkedSongs = await GetCheckedLikedSongs(user, randomizedSongs.ToList());
-
-            randomizedSongs = randomizedSongs.Where((_, index) => !checkedSongs[index]);
-            return randomizedSongs.OrderBy(i => Guid.NewGuid()).Take(5).ToList();
+            return await FilterUnlikedSongs(user, recommendedSongs.SelectMany(i => i).ToList(), limit);
         }
 
-        private async Task<List<string>> GetScrapedRecommendations(string url)
+        private async Task<List<string>?> FilterUnlikedSongs(User user, List<string> trackIds, int limit = 5)
         {
-            var client = httpClientFactory.CreateClient("SpotifyPublicPage");
-            if (url == null) return [];
+            if (trackIds == null || !trackIds.Any()) return null;
 
-            var html = await client.GetStringAsync(url);
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(html);
+            var limitedSongs = trackIds.Distinct().Take(50).ToList();
+            var checkedSongs = await apiService.CheckLikedSongs(user, limitedSongs);
 
-            var recommendedSongs = htmlDoc.DocumentNode
-                .Descendants()
-                .Where(node => node.Name == "a")
-                .Select(node => node.GetAttributeValue("href", ""))
-                .Where(href => href.Contains("track"))
-                .Select(href => href.Split("/").Last())
-                .Distinct()
-                .ToList();
-
-            return recommendedSongs;
+            var unlikedSongs = limitedSongs.Where((_, index) => !checkedSongs[index]).ToList();
+            return unlikedSongs.OrderBy(i => Guid.NewGuid()).Take(limit).ToList();
         }
 
         public async Task<string?> GetTrackPreviewUrl(string trackId)
         {
-            var client = httpClientFactory.CreateClient("SpotifyPublicPage");
+            var cacheKey = $"preview:{trackId}";
+
+            if (memoryCache.TryGetValue(cacheKey, out string? cachedPreviewUrl))
+            {
+                return cachedPreviewUrl;
+            }
+
             var trackUrl = $"https://open.spotify.com/track/{trackId}";
+            var previewUrl = await scrapingService.GetScrapedPreviewUrl(trackUrl);
 
-            try
-            {
-                var html = await client.GetStringAsync(trackUrl);
-                var htmlDoc = new HtmlDocument();
-                htmlDoc.LoadHtml(html);
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromHours(24));
 
-                var scdnLink = htmlDoc.DocumentNode
-                    .Descendants()
-                    .SelectMany(node => node.Attributes)
-                    .Select(attr => attr.Value)
-                    .FirstOrDefault(value => !string.IsNullOrEmpty(value) && value.Contains("p.scdn.co"));
+            memoryCache.Set(cacheKey, previewUrl, cacheOptions);
 
-                if (scdnLink != null)
-                {
-                    return scdnLink;
-                }
-                else
-                {
-                    logger.LogWarning("--> Não foi possível obter a URL do preview do track: {TrackId}", trackId);
-                    return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "--> Erro ao obter a URL do preview do track: {TrackId}", trackId);
-                return null;
-            }
+            return previewUrl;
         }
 
-        private List<MusicDTO> TracksToMusics(List<SpotifyTrack> tracks)
-        {
-            var musics = new List<MusicDTO>();
-            foreach (var track in tracks)
-            {
-                musics.Add(TrackToMusic(track));
-            }
-
-            return musics;
-        }
-
-        private MusicDTO TrackToMusic(SpotifyTrack track)
-        {
-            return new MusicDTO
-            {
-                Id = track.Id,
-                Name = track.Name,
-                Artist = track.Artists.First().Name,
-                LinkUrl = track.Uri,
-                SmallImageUrl = track.Album.Images.Last().Url,
-                LargeImageUrl = track.Album.Images.First().Url,
-                MediumImageUrl = track.Album.Images[1].Url,
-            };
-        }
     }
 }

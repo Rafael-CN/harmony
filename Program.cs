@@ -17,6 +17,7 @@ using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using Harmony.Services.Spotify.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,12 +92,18 @@ builder.Services.AddHttpClient("SpotifyApi", client =>
 });
 
 builder.Services.AddScoped<IJWTService, JWTService>();
-builder.Services.AddScoped<ISpotifyService, SpotifyService>();
-builder.Services.AddScoped<IReccoService, ReccoService>();
 builder.Services.AddScoped<IStatusService, StatusService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
 builder.Services.AddScoped<ICompatibilityService, CompatibilityService>();
+
+builder.Services.AddScoped<ISpotifyAuthService, SpotifyAuthService>();
+builder.Services.AddScoped<ISpotifyApiService, SpotifyApiService>();
+builder.Services.AddScoped<ISpotifyScrapingService, SpotifyScrapingService>();
+
+builder.Services.AddScoped<ISpotifyService, SpotifyService>();
+
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

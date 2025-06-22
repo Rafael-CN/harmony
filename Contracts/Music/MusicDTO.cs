@@ -12,7 +12,5 @@ namespace Harmony.Contracts.Music
         public string SmallImageUrl { get; set; } = string.Empty;
         public string MediumImageUrl { get; set; } = string.Empty;
         public string LargeImageUrl { get; set; } = string.Empty;
-
-        public string PreviewUrl { get; set; } = string.Empty;
     }
 }

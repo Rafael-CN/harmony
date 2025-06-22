@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Harmony.Controllers.DTOs.Discovery;
 using Harmony.Data;
 using Harmony.Models;
-using Harmony.Services.Recommendations;
 using Harmony.Services.Spotify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -75,15 +74,13 @@ namespace Harmony.Controllers
         }
 
         [HttpGet("music")]
-        public async Task<IActionResult> GetRecommendedMusic()
+        public async Task<IActionResult> GetRecommendedMusic([FromQuery] int limit = 5)
         {
             var currentUsername = User.FindFirstValue(ClaimTypes.Name);
             var currentUser = await _userManager.FindByNameAsync(currentUsername!);
             if (currentUser == null) return Unauthorized();
 
-            var recommendedSongsIds = await _spotifyService.GetRecommendations(currentUser);
-            var recommendedSongs = await _spotifyService.GetSongs(currentUser, recommendedSongsIds!);
-
+            var recommendedSongs = await _spotifyService.GetRecommendations(currentUser, limit);
             return Ok(recommendedSongs);
         }
 
@@ -94,9 +91,7 @@ namespace Harmony.Controllers
             var currentUser = await _userManager.FindByNameAsync(currentUsername!);
             if (currentUser == null) return Unauthorized();
 
-            var recommendedSongsIds = await _spotifyService.GetRecommendations(currentUser, s);
-            var recommendedSongs = await _spotifyService.GetSongs(currentUser, recommendedSongsIds!);
-
+            var recommendedSongs = await _spotifyService.GetRecommendationsFromSeeds(currentUser, s);
             return Ok(recommendedSongs);
         }
     }

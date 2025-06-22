@@ -63,6 +63,19 @@ namespace Harmony.Controllers
             return Ok(artist);
         }
 
+        [HttpGet("artists")]
+        public async Task<IActionResult> GetArtists([FromQuery] List<string> ids)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            var artists = await spotifyService.GetArtists(user, ids);
+            if (artists == null) return BadRequest(new { Message = "Não foi possível obter os artistas" });
+
+            return Ok(artists);
+        }
+
+
         [HttpGet("{trackId}/preview")]
         public async Task<IActionResult> GetTrackPreview(string trackId)
         {
