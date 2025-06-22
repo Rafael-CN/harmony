@@ -5,7 +5,7 @@
         public async Task InvokeAsync(HttpContext context)
         {
             var originalBodyStream = context.Response.Body;
-            
+
             using (var responseBody = new MemoryStream())
             {
                 context.Response.Body = responseBody;
@@ -14,7 +14,7 @@
                 var responseBodyContent = await ReadResponseBody(context.Response);
 
                 logger.LogInformation("--> Caminho da requisição: {Path}", context.Request.Path);
-                logger.LogInformation("--> Corpo da resposta: {Body}", responseBodyContent);
+                logger.LogInformation("--> Corpo da resposta: {Body}", responseBodyContent[..Math.Min(responseBodyContent.Length, 100)] + "...");
 
                 await responseBody.CopyToAsync(originalBodyStream);
             }

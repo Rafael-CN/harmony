@@ -18,6 +18,8 @@ namespace Harmony.Services.Spotify
     {
         #region Delegates
 
+        public Task<HttpClient?> ConfigHttpClient(User user) => authService.ConfigHttpClient(user);
+
         public Task<string?> GetAccessToken(User user) => authService.GetAccessToken(user);
         public Task<SpotifyToken?> GetToken(string authCode) => authService.GetToken(authCode);
 
@@ -29,6 +31,9 @@ namespace Harmony.Services.Spotify
 
         public Task<List<MusicDTO>?> GetLastLikedSongs(User user, int limit = 5) => apiService.GetLastLikedSongs(user, limit);
         public Task<int?> GetLikedSongsCount(User user) => apiService.GetLikedSongsCount(user);
+        public Task<bool> SetLikedSongs(User user, List<string> trackIds) => apiService.SetLikedSongs(user, trackIds);
+
+        public Task<List<bool>> CheckLikedSongs(User user, List<string> trackIds) => apiService.CheckLikedSongs(user, trackIds);
 
         public Task<List<MusicDTO>?> GetQuerySongs(User user, string query, int offset = 0) => apiService.GetQuerySongs(user, query, offset);
 

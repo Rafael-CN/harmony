@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using Harmony.Contracts.Music;
 using Harmony.Models;
@@ -177,6 +178,15 @@ namespace Harmony.Services.Spotify.Components
             return pagedData?.Total;
         }
 
+        public async Task<bool> SetLikedSongs(User user, List<string> trackIds)
+        {
+            var client = await spotifyAuthService.ConfigHttpClient(user);
+            if (client == null) return false;
+
+            var response = await client.PutAsync("me/tracks?ids=" + string.Join(",", trackIds), null);
+            return response.IsSuccessStatusCode;
+        }
+
         public async Task<List<bool>> CheckLikedSongs(User user, List<string> trackIds)
         {
             var client = await spotifyAuthService.ConfigHttpClient(user);
@@ -249,8 +259,8 @@ namespace Harmony.Services.Spotify.Components
                 SmallImageUrl = track.Album.Images.Last().Url,
                 LargeImageUrl = track.Album.Images.First().Url,
                 MediumImageUrl = track.Album.Images[1].Url,
+                ReleaseYear = track.Album.ReleaseDate.Split('-').FirstOrDefault() ?? "",
             };
         }
-
     }
 }

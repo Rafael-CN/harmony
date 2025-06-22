@@ -6,7 +6,6 @@ namespace Harmony.Services.Spotify.Components
 {
     public interface ISpotifyApiService
     {
-
         public Task<MusicDTO?> GetSong(User user, string id);
         public Task<List<MusicDTO>?> GetSongs(User user, IEnumerable<string> ids);
 
@@ -15,6 +14,7 @@ namespace Harmony.Services.Spotify.Components
 
         public Task<List<MusicDTO>?> GetLastLikedSongs(User user, int limit = 5);
         public Task<int?> GetLikedSongsCount(User user);
+        public Task<bool> SetLikedSongs(User user, List<string> trackIds);
 
         public Task<List<bool>> CheckLikedSongs(User user, List<string> trackIds);
 

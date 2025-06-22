@@ -9,6 +9,8 @@ namespace Harmony.Services.Spotify.DTOs
         public required string Name { get; set; }
         public required string Uri { get; set; }
 
+        public string ReleaseDate { get; set; } = string.Empty;
+
         public required List<SpotifyImage> Images { get; set; }
     }
 }

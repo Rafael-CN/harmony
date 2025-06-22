@@ -14,8 +14,6 @@ namespace Harmony.Services.Spotify.DTOs
 
         public required string Uri { get; set; }
 
-        public string? PreviewUrl { get; set; }
-
         public required SpotifyAlbum Album { get; set; }
         public required List<SpotifyArtist> Artists { get; set; }
     }
