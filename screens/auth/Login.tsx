@@ -1,5 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { useAuth } from "../../api/auth";
+import HTextInput from "../../components/common/HTextInput";
 
 export default function Login() {
     const navigator = useNavigation();
@@ -47,41 +57,44 @@ export default function Login() {
     return (
         <>
             <StatusBar style="light"></StatusBar>
-            <LinearGradient colors={["#000000", "#1B1B28"]} style={{ flex: 1 }}>
-                <SafeAreaView style={styles.container}>
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.title}>harmony.</Text>
-                        <Text style={styles.legend}>Onde você se sintoniza com todos!</Text>
-                    </View>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Nome do usuário"
-                        placeholderTextColor={color.light}
-                        onChangeText={(value) => setUser({ ...user, name: value })}
-                    ></TextInput>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Senha"
-                        placeholderTextColor={color.light}
-                        onChangeText={(value) => setUser({ ...user, password: value })}
-                        secureTextEntry
-                        autoCapitalize="none"
-                    ></TextInput>
+            <LinearGradient colors={["#000000", color.extraDark]} style={{ flex: 1 }}>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                >
+                    <SafeAreaView style={styles.container}>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.title}>harmony.</Text>
+                            <Text style={styles.legend}>Onde você se sintoniza com todos!</Text>
+                        </View>
+                        <HTextInput
+                            placeholder="Nome do usuário"
+                            placeholderTextColor={color.light}
+                            onChangeText={(value) => setUser({ ...user, name: value })}
+                        />
+                        <HTextInput
+                            placeholder="Senha"
+                            placeholderTextColor={color.light}
+                            onChangeText={(value) => setUser({ ...user, password: value })}
+                            autoCapitalize="none"
+                            secureTextEntry
+                        />
 
-                    {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
+                        {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
 
-                    <TouchableOpacity
-                        style={[styles.button, signingIn && styles.buttonDisabled]}
-                        onPress={handleSigningIn}
-                        disabled={signingIn}
-                    >
-                        <Text style={styles.buttonText}>Entrar</Text>
-                    </TouchableOpacity>
-                    <Pressable style={styles.link} onPress={goToRegister}>
-                        <Text style={styles.linkText}>Ainda não possui uma conta?</Text>
-                        <Text style={[styles.linkText, styles.linkTextBold]}>Cadastre-se</Text>
-                    </Pressable>
-                </SafeAreaView>
+                        <TouchableOpacity
+                            style={[styles.button, signingIn && styles.buttonDisabled]}
+                            onPress={handleSigningIn}
+                            disabled={signingIn}
+                        >
+                            <Text style={styles.buttonText}>Entrar</Text>
+                        </TouchableOpacity>
+                        <Pressable style={styles.link} onPress={goToRegister}>
+                            <Text style={styles.linkText}>Ainda não possui uma conta?</Text>
+                            <Text style={[styles.linkText, styles.linkTextBold]}>Cadastre-se</Text>
+                        </Pressable>
+                    </SafeAreaView>
+                </KeyboardAvoidingView>
             </LinearGradient>
         </>
     );
@@ -113,23 +126,9 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
 
-    input: {
-        width: "75%",
-        height: "8%",
-        backgroundColor: color.extraDark,
-        borderRadius: 15,
-        paddingHorizontal: 20,
-        fontSize: 16,
-        fontFamily: "Nexa-ExtraLight",
-        color: color.extraLight,
-        borderWidth: 1,
-        borderColor: color.light,
-        marginTop: 25,
-    },
-
     button: {
         width: "75%",
-        height: "8%",
+        height: 60,
         backgroundColor: color.dark,
         borderRadius: 15,
         alignItems: "center",

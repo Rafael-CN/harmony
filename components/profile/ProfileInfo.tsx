@@ -16,7 +16,7 @@ const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit:
 
     const imageSource = profile?.profilePictureUrl
         ? { uri: profile.profilePictureUrl }
-        : require("../../assets/users/1.png");
+        : require("../../assets/users/default.png");
 
     return (
         <View style={styles.profileContainer}>

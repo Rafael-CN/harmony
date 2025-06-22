@@ -1,5 +1,5 @@
 import { useAxios } from "./apiClient";
-import { RecommendedMusic, RecommendedUser } from "../types";
+import { Music, RecommendedUser } from "../types";
 
 const axios = useAxios();
 
@@ -11,12 +11,12 @@ async function getRecommendedUsers(
     return response?.data || [];
 }
 
-async function getRecommendedMusics(): Promise<RecommendedMusic[]> {
-    const response = await axios.get(`discovery/music`, true);
+async function getRecommendedMusics(limit: number = 5): Promise<Music[]> {
+    const response = await axios.get(`discovery/music?limit=${limit}`, true);
     return response?.data || [];
 }
 
-async function getRecommendedSeeds(seeds: string[]): Promise<RecommendedMusic[]> {
+async function getRecommendedSeeds(seeds: string[]): Promise<Music[]> {
     const response = await axios.get(`discovery/music/seeds?s=${seeds.join(",")}`, true);
     return response?.data || [];
 }

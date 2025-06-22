@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { color } from "../../theme.json";
 
 const SkeletonLoader = ({ style }: { style?: any }) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
@@ -17,14 +18,14 @@ const SkeletonLoader = ({ style }: { style?: any }) => {
 
     const translateX = animatedValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [-200, 200],
+        outputRange: [-300, 300],
     });
 
     return (
         <View style={[styles.container, style]}>
             <Animated.View style={[styles.gradient, { transform: [{ translateX }] }]}>
                 <LinearGradient
-                    colors={["#222", "#333", "#222"]}
+                    colors={[color.dark, color.regular, color.dark]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={StyleSheet.absoluteFillObject}
@@ -36,7 +37,7 @@ const SkeletonLoader = ({ style }: { style?: any }) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#222",
+        backgroundColor: color.dark,
         overflow: "hidden",
     },
     gradient: {

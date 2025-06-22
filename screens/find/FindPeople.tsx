@@ -75,20 +75,18 @@ export default function FindPeople() {
         fetchUsers();
     }, []);
 
-    const handleSwipe = (direction: "left" | "right", resetCard: () => void) => {
+    const handleSwipe = (direction: "left" | "right") => {
         setUsers((prev) => prev.slice(1));
 
         if (users.length <= 3) {
             fetchUsers();
         }
-
-        setTimeout(resetCard, 50);
     };
 
     const currentUser = users[0];
     return (
         <LinearGradient colors={["#000000", color.extraDark]} style={{ flex: 1 }}>
-            <SwipeCard onSwipe={handleSwipe}>
+            <SwipeCard onSwipeEnd={handleSwipe}>
                 {currentUser && <UserCard user={currentUser} />}
             </SwipeCard>
         </LinearGradient>

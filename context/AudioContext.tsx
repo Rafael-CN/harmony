@@ -1,15 +1,17 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { Audio } from "expo-av";
-import { Music } from "../types";
 import { useMusic } from "../api";
 
 interface IAudioContext {
-    playTrack: (track: Music) => void;
+    playTrack: (trackId: string) => void;
     stopTrack: () => void;
     togglePlayback: () => void;
     isPlaying: boolean;
     isLoading: boolean;
     currentTrackId: string | null;
+
+    playbackPosition: number;
+    playbackDuration: number;
 }
 
 const AudioContext = createContext<IAudioContext | undefined>(undefined);
@@ -19,6 +21,8 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
+    const [playbackPosition, setPlaybackPosition] = useState(0);
+    const [playbackDuration, setPlaybackDuration] = useState(30000);
     const musicApi = useMusic();
 
     const stopTrack = async () => {
@@ -28,44 +32,59 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
             setSound(null);
             setIsPlaying(false);
             setCurrentTrackId(null);
+            setPlaybackPosition(0);
         }
     };
 
-    const playTrack = async (track: Music) => {
+    const playTrack = async (trackId: string) => {
         if (isLoading) return;
-        // Se a mesma música já estiver carregada, apenas alterna o play/pause
-        if (sound && currentTrackId === track.id) {
+
+        if (sound && currentTrackId === trackId) {
             togglePlayback();
             return;
         }
 
-        // Se uma música diferente estiver tocando, pare-a primeiro
         if (sound) {
             await stopTrack();
         }
 
         try {
             setIsLoading(true);
-            setCurrentTrackId(track.id);
-            const previewUrl = await musicApi.getTrackPreview(track.id);
-
+            setCurrentTrackId(trackId);
+            const previewUrl = await musicApi.getTrackPreview(trackId);
             if (!previewUrl) {
-                alert("Prévia de áudio não disponível para esta música.");
                 throw new Error("No preview URL");
             }
 
-            const { sound: newSound } = await Audio.Sound.createAsync(
+            const { sound: newSound, status } = await Audio.Sound.createAsync(
                 { uri: previewUrl },
-                { shouldPlay: true }
+                {
+                    shouldPlay: true,
+                    progressUpdateIntervalMillis: 250,
+                }
             );
+
+            if (status.isLoaded) {
+                setPlaybackDuration(status.durationMillis || 30000);
+            }
 
             setSound(newSound);
             setIsPlaying(true);
 
-            // Listener para quando a música termina de tocar sozinha
             newSound.setOnPlaybackStatusUpdate((status) => {
-                if (status.isLoaded && status.didJustFinish) {
-                    stopTrack();
+                if (!status.isLoaded) {
+                    if (status.error) {
+                        console.error(`Error during playback: ${status.error}`);
+                        stopTrack();
+                    }
+                    return;
+                }
+                setIsPlaying(status.isPlaying);
+                setPlaybackPosition(status.positionMillis);
+
+                if (status.didJustFinish) {
+                    setIsPlaying(false);
+                    setPlaybackPosition(0);
                 }
             });
         } catch (error) {
@@ -80,15 +99,25 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
         if (!sound) return;
         if (isPlaying) {
             await sound.pauseAsync();
-            setIsPlaying(false);
         } else {
-            await sound.playAsync();
-            setIsPlaying(true);
+            const status = await sound.getStatusAsync();
+            if (status.isLoaded && status.positionMillis >= (status.durationMillis || 0)) {
+                await sound.replayAsync();
+            } else {
+                await sound.playAsync();
+            }
         }
+        setIsPlaying(!isPlaying);
     };
 
-    // Efeito de limpeza para descarregar o som ao desmontar o componente
     useEffect(() => {
+        Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
+        });
         return () => {
             sound?.unloadAsync();
         };
@@ -96,7 +125,16 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
 
     return (
         <AudioContext.Provider
-            value={{ playTrack, stopTrack, togglePlayback, isPlaying, isLoading, currentTrackId }}
+            value={{
+                playTrack,
+                stopTrack,
+                togglePlayback,
+                isPlaying,
+                isLoading,
+                currentTrackId,
+                playbackPosition,
+                playbackDuration,
+            }}
         >
             {children}
         </AudioContext.Provider>

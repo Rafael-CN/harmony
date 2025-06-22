@@ -1,6 +1,5 @@
-import LikedMusic from "./LikedMusic";
 import HomeHeader from "./HomeHeader";
 import StatusBox from "./StatusBox";
-import RecommendMusic from "./RecommendMusic";
+import MusicCard from "./MusicCard";
 
-export { LikedMusic, HomeHeader, StatusBox, RecommendMusic };
+export { HomeHeader, StatusBox, MusicCard };

@@ -3,9 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../theme.json";
 import { Home, Chat, Search, Profile } from "../screens/tabs";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { transform } from "@babel/core";
 import FindNavigator from "./FindNavigator";
 import { ProfileProvider } from "../context/ProfileContext";
 import { AudioProvider } from "../context/AudioContext";
@@ -109,7 +107,7 @@ export default function TabNavigator() {
                             options={{
                                 tabBarIcon: ({ color, focused }) => (
                                     <CustomTabIcon
-                                        name={focused ? "heart" : "heart-outline"}
+                                        name={focused ? "compass" : "compass-outline"}
                                         focused={focused}
                                         iconColor={color}
                                     />

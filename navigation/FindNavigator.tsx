@@ -5,7 +5,14 @@ export default function FindNavigator() {
     const Stack = createNativeStackNavigator();
 
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" }, animation: "none" }} initialRouteName="Main">
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: "#000" },
+                animation: "none",
+            }}
+            initialRouteName="Main"
+        >
             <Stack.Screen name="Main" component={Main}></Stack.Screen>
             <Stack.Screen name="FindMusic" component={FindMusic}></Stack.Screen>
             <Stack.Screen name="FindPeople" component={FindPeople}></Stack.Screen>

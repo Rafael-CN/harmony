@@ -5,15 +5,11 @@ import { color } from "../../theme.json";
 import * as Linking from "expo-linking";
 import { Music } from "../../types";
 import { useState } from "react";
-import SkeletonLoader from "../common/SkeletonLoader";
-import { useMusic } from "../../api";
 import { useAudio } from "../../context/AudioContext";
+import SkeletonLoader from "./SkeletonLoader";
 
-const LikedMusic = ({ music }: { music: Music }) => {
-    const [isLoading, setIsLoading] = useState(true);
-
-    const musicApi = useMusic();
-
+const MusicRow = ({ music }: { music: Music }) => {
+    const [isImageLoading, setIsImageLoading] = useState(true);
     const audio = useAudio();
 
     const isThisTrackActive = audio.currentTrackId === music.id;
@@ -21,11 +17,21 @@ const LikedMusic = ({ music }: { music: Music }) => {
     const isThisTrackLoading = audio.isLoading && isThisTrackActive;
 
     const handlePress = () => {
-        audio.playTrack(music);
+        audio.playTrack(music.id);
+    };
+
+    const handleLinkPress = (e: any) => {
+        e.stopPropagation();
+        Linking.openURL(music.linkUrl);
     };
 
     return (
-        <TouchableOpacity style={styles.songContainer} onPress={handlePress} activeOpacity={0.7}>
+        <TouchableOpacity
+            style={[styles.songContainer, isThisTrackPlaying && styles.songContainerActive]}
+            onPress={handlePress}
+            activeOpacity={0.7}
+            disabled={isThisTrackLoading}
+        >
             <View style={styles.songInfoContainer}>
                 <View style={styles.songCoverContainer}>
                     <Image
@@ -33,12 +39,17 @@ const LikedMusic = ({ music }: { music: Music }) => {
                         style={styles.songCover}
                         cachePolicy={"memory-disk"}
                         priority={"high"}
-                        onLoadEnd={() => setIsLoading(false)}
+                        onLoadEnd={() => setIsImageLoading(false)}
                     />
 
-                    {isLoading && <SkeletonLoader style={styles.songCover} />}
+                    {isImageLoading && <SkeletonLoader style={styles.songCover} />}
 
-                    <View style={styles.coverOverlay}>
+                    <View
+                        style={[
+                            styles.coverOverlay,
+                            (isThisTrackPlaying || isThisTrackLoading) && styles.coverOverlayActive,
+                        ]}
+                    >
                         {isThisTrackLoading ? (
                             <ActivityIndicator size="small" color={"#fff"} />
                         ) : isThisTrackPlaying ? (
@@ -47,25 +58,30 @@ const LikedMusic = ({ music }: { music: Music }) => {
                                 style={styles.equalizer}
                             />
                         ) : (
-                            <Ionicons name="play" style={styles.playIcon}></Ionicons>
+                            <Ionicons name="play" style={styles.playIcon} />
                         )}
                     </View>
                 </View>
 
                 <View style={styles.songInfo}>
-                    <Text style={styles.songTitle} numberOfLines={1}>
+                    <Text
+                        style={[styles.songTitle, isThisTrackPlaying && styles.songTitleActive]}
+                        numberOfLines={1}
+                    >
                         {music.name}
                     </Text>
-                    <Text style={styles.songArtist}>{music.artist}</Text>
+                    <Text
+                        style={[styles.songArtist, isThisTrackPlaying && styles.songArtistActive]}
+                    >
+                        {music.artist}
+                    </Text>
                 </View>
             </View>
 
             <TouchableOpacity
                 style={styles.songLink}
-                onPress={(e) => {
-                    e.stopPropagation();
-                    Linking.openURL(music.linkUrl);
-                }}
+                onPress={handleLinkPress}
+                disabled={isThisTrackLoading}
             >
                 <Ionicons name="open-outline" style={styles.songLinkIcon} />
             </TouchableOpacity>
@@ -87,9 +103,15 @@ const styles = StyleSheet.create({
         borderColor: color.dark,
     },
 
+    songContainerActive: {
+        borderColor: color.regular,
+        backgroundColor: `${color.regular}10`,
+    },
+
     songInfoContainer: {
         flexDirection: "row",
         alignItems: "center",
+        flex: 1,
     },
 
     songCoverContainer: {
@@ -112,6 +134,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
 
+    coverOverlayActive: {
+        backgroundColor: "rgba(0,0,0,0.6)",
+    },
+
     playIcon: {
         fontSize: 22,
         color: "rgba(255,255,255,0.8)",
@@ -124,13 +150,18 @@ const styles = StyleSheet.create({
 
     songInfo: {
         marginLeft: 10,
+        flex: 1,
     },
 
     songTitle: {
         color: color.extraLight,
         fontSize: 14,
         fontFamily: "Nexa-Heavy",
-        width: 200,
+        maxWidth: "85%",
+    },
+
+    songTitleActive: {
+        color: color.regular,
     },
 
     songArtist: {
@@ -138,6 +169,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontFamily: "Nexa-Light",
         marginTop: 5,
+    },
+
+    songArtistActive: {
+        color: color.regular,
     },
 
     songLink: {
@@ -154,4 +189,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default LikedMusic;
+export default MusicRow;

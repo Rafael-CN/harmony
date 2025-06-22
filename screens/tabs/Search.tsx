@@ -1,101 +1,12 @@
-import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image } from "expo-image";
-import * as Linking from "expo-linking";
 import { Music } from "../../types";
 import { useMusic } from "../../api/music";
-
-const LikedMusic = ({ music }: { music: Music }) => {
-    const styles = StyleSheet.create({
-        songContainer: {
-            width: "100%",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: 15,
-            backgroundColor: color.extraDark,
-            borderRadius: 10,
-            marginBottom: 15,
-        },
-
-        songInfoContainer: {
-            flexDirection: "row",
-            alignItems: "center",
-        },
-
-        songCover: {
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-        },
-
-        songInfo: {
-            marginLeft: 10,
-        },
-
-        songTitle: {
-            color: color.extraLight,
-            fontSize: 14,
-            fontFamily: "Nexa-Heavy",
-            width: 200,
-        },
-
-        songArtist: {
-            color: color.light,
-            fontSize: 12,
-            fontFamily: "Nexa-Light",
-            marginTop: 5,
-        },
-
-        songLink: {
-            padding: 10,
-            borderRadius: 50,
-            backgroundColor: color.dark,
-        },
-
-        songLinkIcon: {
-            fontSize: 20,
-            color: color.light,
-        },
-    });
-
-    return (
-        <View style={styles.songContainer}>
-            <View style={styles.songInfoContainer}>
-                <Image
-                    source={{ uri: music.smallImageUrl }}
-                    style={styles.songCover}
-                    priority={"high"}
-                />
-                <View style={styles.songInfo}>
-                    <Text style={styles.songTitle} numberOfLines={1}>
-                        {music.name}
-                    </Text>
-                    <Text style={styles.songArtist}>{music.artist}</Text>
-                </View>
-            </View>
-
-            <TouchableOpacity
-                style={styles.songLink}
-                onPress={() => Linking.openURL(music.linkUrl)}
-            >
-                <Ionicons name="open-outline" style={styles.songLinkIcon} />
-            </TouchableOpacity>
-        </View>
-    );
-};
+import { MusicRow } from "../../components/common";
 
 export default function Search() {
     const textColor = color.extraLight;
@@ -150,7 +61,7 @@ export default function Search() {
                     {querySongs && (
                         <ScrollView style={styles.searchResults} onScroll={handleScroll}>
                             {querySongs.map((music, i) => (
-                                <LikedMusic key={i} music={music} />
+                                <MusicRow key={i} music={music} />
                             ))}
                         </ScrollView>
                     )}

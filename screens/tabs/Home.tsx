@@ -1,15 +1,15 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { color } from "../../theme.json";
 import React, { useEffect, useState } from "react";
-import { HomeHeader, LikedMusic, RecommendMusic, StatusBox } from "../../components/home";
+import { HomeHeader, MusicCard, StatusBox } from "../../components/home";
 import { useMusic } from "../../api/music";
-import { useUser } from "../../api/profile";
-import { Music, ProfileData } from "../../types";
+import { Music } from "../../types";
 import { useProfile } from "../../hooks/useProfile";
 import { useDiscovery } from "../../api";
+import { MusicRow } from "../../components/common";
 
 export default function Home() {
     const musicApi = useMusic();
@@ -61,7 +61,7 @@ export default function Home() {
 
                     <FlatList
                         data={recommendedMusics}
-                        renderItem={({ item }) => <RecommendMusic music={item} />}
+                        renderItem={({ item }) => <MusicCard music={item} />}
                         keyExtractor={(item) => item.id}
                         horizontal
                         showsHorizontalScrollIndicator={false}
@@ -83,7 +83,7 @@ export default function Home() {
                     data={likedMusics}
                     renderItem={({ item }) => (
                         <View style={{ paddingHorizontal: 20 }}>
-                            <LikedMusic music={item} />
+                            <MusicRow music={item} />
                         </View>
                     )}
                     keyExtractor={(item) => item.id}

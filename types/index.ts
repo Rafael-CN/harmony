@@ -6,6 +6,9 @@ export interface Music {
     smallImageUrl: string;
     mediumImageUrl: string;
     largeImageUrl: string;
+
+    artistImageUrl?: string;
+    releaseYear?: number;
 }
 
 export interface Artist {
@@ -36,14 +39,4 @@ export interface RecommendedUser {
     profilePictureUrl?: string;
     compatibilityScore: number;
     bio?: string;
-}
-
-export interface RecommendedMusic {
-    id: string;
-    name: string;
-    artist: string;
-    linkUrl: string;
-    smallImageUrl: string;
-    mediumImageUrl: string;
-    largeImageUrl: string;
 }

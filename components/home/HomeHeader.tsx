@@ -11,7 +11,7 @@ const HomeHeader = ({ profile }: { profile: ProfileData | null }) => {
 
     const imageSource = profile?.profilePictureUrl
         ? { uri: profile.profilePictureUrl }
-        : require("../../assets/users/1.png");
+        : require("../../assets/users/default.png");
 
     return (
         <LinearGradient

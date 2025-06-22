@@ -94,7 +94,7 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
         ? { uri: selectedImageUri }
         : editedProfile?.profilePictureUrl
         ? { uri: editedProfile.profilePictureUrl }
-        : require("../../assets/users/1.png");
+        : require("../../assets/users/default.png");
 
     return (
         <Modal

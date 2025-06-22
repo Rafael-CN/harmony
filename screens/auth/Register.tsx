@@ -1,11 +1,21 @@
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { useAuth } from "../../api/auth";
+import HTextInput from "../../components/common/HTextInput";
 
 export default function Register() {
     const navigator = useNavigation();
@@ -36,45 +46,46 @@ export default function Register() {
         <>
             <StatusBar style="light"></StatusBar>
             <LinearGradient colors={["#000000", "#1B1B28"]} style={{ flex: 1 }}>
-                <SafeAreaView style={styles.container}>
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.title}>harmony.</Text>
-                        <Text style={styles.legend}>Onde você se sintoniza com todos!</Text>
-                    </View>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1 }}
+                >
+                    <SafeAreaView style={styles.container}>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.title}>harmony.</Text>
+                            <Text style={styles.legend}>Onde você se sintoniza com todos!</Text>
+                        </View>
 
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Nome do usuário"
-                        placeholderTextColor={color.light}
-                        onChangeText={(value) => setUser({ ...user, username: value })}
-                    ></TextInput>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Email"
-                        placeholderTextColor={color.light}
-                    ></TextInput>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Senha"
-                        placeholderTextColor={color.light}
-                        secureTextEntry
-                        autoCapitalize="none"
-                        onChangeText={(value) => setUser({ ...user, password: value })}
-                    ></TextInput>
+                        <HTextInput
+                            placeholder="Nome do usuário"
+                            placeholderTextColor={color.light}
+                            onChangeText={(value) => setUser({ ...user, username: value })}
+                        />
 
-                    <TouchableOpacity
-                        style={[styles.button, signingUp && styles.buttonDisabled]}
-                        onPress={handleSignUp}
-                        disabled={signingUp}
-                    >
-                        <Text style={styles.buttonText}>Cadastrar</Text>
-                    </TouchableOpacity>
+                        <HTextInput placeholder="Email" placeholderTextColor={color.light} />
 
-                    <Pressable style={styles.link} onPress={goToLogin}>
-                        <Text style={styles.linkText}>Já possui uma conta?</Text>
-                        <Text style={[styles.linkText, styles.linkTextBold]}>Faça login</Text>
-                    </Pressable>
-                </SafeAreaView>
+                        <HTextInput
+                            placeholder="Senha"
+                            placeholderTextColor={color.light}
+                            secureTextEntry
+                            autoCapitalize="none"
+                            onChangeText={(value) => setUser({ ...user, password: value })}
+                        />
+
+                        <TouchableOpacity
+                            style={[styles.button, signingUp && styles.buttonDisabled]}
+                            onPress={handleSignUp}
+                            disabled={signingUp}
+                        >
+                            <Text style={styles.buttonText}>Cadastrar</Text>
+                        </TouchableOpacity>
+
+                        <Pressable style={styles.link} onPress={goToLogin}>
+                            <Text style={styles.linkText}>Já possui uma conta?</Text>
+                            <Text style={[styles.linkText, styles.linkTextBold]}>Faça login</Text>
+                        </Pressable>
+                    </SafeAreaView>
+                </KeyboardAvoidingView>
             </LinearGradient>
         </>
     );
@@ -107,28 +118,14 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 
-    input: {
-        width: "75%",
-        height: "8%",
-        backgroundColor: color.extraDark,
-        borderRadius: 15,
-        paddingHorizontal: 20,
-        fontSize: 16,
-        fontFamily: "Nexa-ExtraLight",
-        color: color.extraLight,
-        borderWidth: 1,
-        borderColor: color.light,
-        marginBottom: 25,
-    },
-
     button: {
         width: "75%",
-        height: "8%",
+        height: 60,
         backgroundColor: color.dark,
         borderRadius: 15,
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 20,
+        marginVertical: 20,
     },
 
     buttonText: {
