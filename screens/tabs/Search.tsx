@@ -7,6 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "../../types";
 import { useMusic } from "../../api/music";
 import { MusicRow } from "../../components/common";
+import { useUser } from "../../api";
 
 export default function Search() {
     const textColor = color.extraLight;
@@ -16,7 +17,8 @@ export default function Search() {
         if (inputRef.current) inputRef.current.focus();
     });
 
-    const musicService = useMusic();
+    const musicApi = useMusic();
+    const userApi = useUser();
 
     const [querySongs, setQuerySongs] = useState<Array<Music> | null>(null);
     const [search, setSearch] = useState("");
@@ -28,7 +30,7 @@ export default function Search() {
     const handleSearch = () => {
         if (!search) return;
 
-        musicService.getQuerySongs(search).then((songs) => {
+        musicApi.getQuerySongs(search).then((songs) => {
             setQuerySongs(songs);
         });
     };
@@ -40,6 +42,13 @@ export default function Search() {
         const diff = scrollY / (contentHeight - scrollViewHeight);
 
         // console.log(diff);
+    };
+
+    const handleSetNowMusic = async (musicId: string) => {
+        const response = await userApi.updateProfileNowMusic(musicId);
+        if (response) {
+            alert("Música atualizada com sucesso!");
+        }
     };
 
     return (
@@ -61,7 +70,12 @@ export default function Search() {
                     {querySongs && (
                         <ScrollView style={styles.searchResults} onScroll={handleScroll}>
                             {querySongs.map((music, i) => (
-                                <MusicRow key={i} music={music} />
+                                <MusicRow
+                                    key={i}
+                                    music={music}
+                                    linkButtonIcon="add"
+                                    linkButtonPress={() => handleSetNowMusic(music.id)}
+                                />
                             ))}
                         </ScrollView>
                     )}

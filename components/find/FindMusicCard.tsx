@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Music } from "../../types";
 import { StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
-import { SkeletonLoader } from "../../components/common";
+import { SkeletonLoader } from "../common";
 import { color } from "../../theme.json";
 
 const FindMusicCard = ({ music }: { music: Music }) => {

@@ -1,19 +1,10 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ProfileData } from "../../types";
 import { color } from "../../theme.json";
-import { useUser } from "../../api";
-import { useEffect, useState } from "react";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 
 const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit: () => void }) => {
-    const userService = useUser();
-    const [username, setUsername] = useState("");
-
-    useEffect(() => {
-        userService.getUsername().then(setUsername);
-    }, []);
-
     const imageSource = profile?.profilePictureUrl
         ? { uri: profile.profilePictureUrl }
         : require("../../assets/users/default.png");
@@ -29,7 +20,7 @@ const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit:
                         <Ionicons style={styles.profileEditIcon} name="create-outline"></Ionicons>
                     </TouchableOpacity>
                 </View>
-                <Text style={styles.profileUsername}>@{username}</Text>
+                <Text style={styles.profileUsername}>@{profile?.username}</Text>
                 <Text style={styles.profileBio}>{profile?.bio}</Text>
             </View>
         </View>
@@ -38,7 +29,6 @@ const ProfileInfo = ({ profile, onEdit }: { profile: ProfileData | null; onEdit:
 
 const styles = StyleSheet.create({
     profileContainer: {
-        paddingHorizontal: 25,
         flexDirection: "row",
         alignItems: "center",
         marginTop: 30,

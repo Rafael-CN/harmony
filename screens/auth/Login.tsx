@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { useAuth } from "../../api/auth";
 import HTextInput from "../../components/common/HTextInput";
+import { HButton } from "../../components/common";
 
 export default function Login() {
     const navigator = useNavigation();
@@ -82,13 +83,8 @@ export default function Login() {
 
                         {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
 
-                        <TouchableOpacity
-                            style={[styles.button, signingIn && styles.buttonDisabled]}
-                            onPress={handleSigningIn}
-                            disabled={signingIn}
-                        >
-                            <Text style={styles.buttonText}>Entrar</Text>
-                        </TouchableOpacity>
+                        <HButton onPress={handleSigningIn} disabled={signingIn} text="Entrar" />
+
                         <Pressable style={styles.link} onPress={goToRegister}>
                             <Text style={styles.linkText}>Ainda não possui uma conta?</Text>
                             <Text style={[styles.linkText, styles.linkTextBold]}>Cadastre-se</Text>
@@ -124,26 +120,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontFamily: "Nexa-ExtraLight",
         marginTop: 5,
-    },
-
-    button: {
-        width: "75%",
-        height: 60,
-        backgroundColor: color.dark,
-        borderRadius: 15,
-        alignItems: "center",
-        justifyContent: "center",
-        marginVertical: 20,
-    },
-
-    buttonText: {
-        color: color.light,
-        fontSize: 18,
-        fontFamily: "Nexa-Heavy",
-    },
-
-    buttonDisabled: {
-        opacity: 0.5,
     },
 
     link: {

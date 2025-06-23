@@ -3,7 +3,13 @@ import { TextInput } from "react-native";
 import { color } from "../../theme.json";
 
 const HTextInput = ({ ...props }: TextInputProps) => {
-    return <TextInput style={styles.input} placeholderTextColor={color.light} {...props} />;
+    return (
+        <TextInput
+            placeholderTextColor={color.light}
+            {...props}
+            style={[styles.input, props.style]}
+        />
+    );
 };
 
 const styles = StyleSheet.create({

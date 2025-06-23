@@ -1,18 +1,19 @@
 import { StyleSheet, View, Animated, Dimensions, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
-import SwipeCard, { SwipeCardRef } from "./SwipeCard";
+import SwipeCard, { SwipeCardRef } from "../../components/find/SwipeCard";
 import { useEffect, useRef, useState } from "react";
 import { Music } from "../../types";
 import { useDiscovery } from "../../api";
-import SwipeControls, { SwipeControlsRef } from "./SwipeControls";
-import FindMusicCard from "./FindMusicCard";
+import SwipeControls, { SwipeControlsRef } from "../../components/find/SwipeControls";
+import FindMusicCard from "../../components/find/FindMusicCard";
 
 const { width } = Dimensions.get("window");
 
 export default function FindMusic() {
     const discoveryApi = useDiscovery();
 
+    const [hasMoreMusics, setHasMoreMusics] = useState(true);
     const [musicQueue, setMusicQueue] = useState<Music[]>([]);
 
     const renderedQueue = musicQueue.slice(0, 3);
@@ -29,11 +30,12 @@ export default function FindMusic() {
         const recommendedMusics = await discoveryApi.getRecommendedMusics(9);
         setMusicQueue((prev) => [...prev, ...recommendedMusics]);
 
+        if (recommendedMusics.length < 9) setHasMoreMusics(false);
         setIsLoading(false);
     };
 
     useEffect(() => {
-        if (musicQueue.length <= 3) {
+        if (musicQueue.length <= 3 && hasMoreMusics) {
             fetchMusic();
         }
     }, [musicQueue]);
@@ -42,17 +44,10 @@ export default function FindMusic() {
 
     const translateX = useRef(new Animated.Value(0)).current;
 
-    const changeBackgroundColor = async (currentMusic: Music) => {
-        if (!currentMusic) return;
-    };
-
     useEffect(() => {
         translateX.setValue(0);
 
-        if (renderedMusic?.id) {
-            setTrackId(renderedMusic.id);
-            changeBackgroundColor(renderedMusic);
-        }
+        if (renderedMusic?.id) setTrackId(renderedMusic.id);
     }, [renderedMusic]);
 
     const nextCardScale = translateX.interpolate({

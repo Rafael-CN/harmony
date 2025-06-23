@@ -4,12 +4,12 @@ import { useAxios } from "./apiClient";
 const axios = useAxios();
 
 async function getLikedSongs(limit: number = 5): Promise<Array<Music>> {
-    const response = await axios.get(`music/liked/last?limit=${limit}`, true);
+    const response = await axios.get(`music/liked?limit=${limit}`, true);
     return response?.data;
 }
 
-async function getTopSongs(): Promise<Array<Music>> {
-    const response = await axios.get("music/top/songs", true);
+async function setLikedSongs(songIds: Array<string>): Promise<void> {
+    const response = await axios.post(`music/liked`, { songIds }, true);
     return response?.data;
 }
 
@@ -18,22 +18,21 @@ async function getQuerySongs(query: string, offset: number = 0): Promise<Array<M
     return response?.data;
 }
 
-async function getArtist(artistId: string): Promise<Artist> {
-    const response = await axios.get(`music/artist/${artistId}`, true);
+async function getArtists(artistIds: Array<string>): Promise<Array<Artist>> {
+    const response = await axios.get(`music/artists?ids=${artistIds.join(",")}`, true);
     return response?.data;
 }
 
-async function getTrackPreview(trackId: string): Promise<string> {
-    const response = await axios.get(`music/${trackId}/preview`, true);
+async function getSongPreview(songId: string): Promise<string> {
+    const response = await axios.get(`music/${songId}/preview`, true);
     return response?.data.url;
 }
 
 export function useMusic() {
     return {
         getLikedSongs,
-        getTopSongs,
         getQuerySongs,
-        getArtist,
-        getTrackPreview,
+        getArtists,
+        getSongPreview,
     };
 }

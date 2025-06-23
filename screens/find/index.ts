@@ -1,5 +1,5 @@
 import FindMusic from "./FindMusic";
-import FindPeople from "./FindPeople";
+import FindUser from "./FindUser";
 import Main from "./Main";
 
-export { FindMusic, FindPeople, Main };
+export { FindMusic, FindUser, Main };

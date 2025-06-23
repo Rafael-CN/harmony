@@ -31,6 +31,7 @@ export interface ProfileData {
     };
     followersCount: number;
     followingCount: number;
+    nowMusicId: string;
 }
 
 export interface RecommendedUser {
@@ -39,4 +40,5 @@ export interface RecommendedUser {
     profilePictureUrl?: string;
     compatibilityScore: number;
     bio?: string;
+    nowMusicId: string;
 }

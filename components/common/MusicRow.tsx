@@ -4,11 +4,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
 import * as Linking from "expo-linking";
 import { Music } from "../../types";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useAudio } from "../../context/AudioContext";
 import SkeletonLoader from "./SkeletonLoader";
 
-const MusicRow = ({ music }: { music: Music }) => {
+interface MusicRowProps {
+    music: Music;
+    linkButtonIcon?: keyof typeof Ionicons.glyphMap;
+    linkButtonPress?: () => void;
+}
+
+const MusicRow = ({ music, linkButtonIcon, linkButtonPress }: MusicRowProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
     const audio = useAudio();
 
@@ -80,10 +86,10 @@ const MusicRow = ({ music }: { music: Music }) => {
 
             <TouchableOpacity
                 style={styles.songLink}
-                onPress={handleLinkPress}
+                onPress={linkButtonPress || handleLinkPress}
                 disabled={isThisTrackLoading}
             >
-                <Ionicons name="open-outline" style={styles.songLinkIcon} />
+                <Ionicons name={linkButtonIcon || "open-outline"} style={styles.songLinkIcon} />
             </TouchableOpacity>
         </TouchableOpacity>
     );

@@ -45,15 +45,13 @@ const SwipeControls = forwardRef<SwipeControlsRef, SwipeControlsProps>(
             Animated.timing(progressAnim, {
                 toValue: progress,
                 duration: 200,
-                useNativeDriver: false,
+                useNativeDriver: true,
             }).start();
         }, [isThisTrackActive, progress]);
 
-        const progressWidth = progressAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: ["0%", "100%"],
-            extrapolate: "clamp",
-        });
+        const progressStyle = {
+            transform: [{ scaleX: progressAnim }],
+        };
 
         useImperativeHandle(ref, () => ({
             playTrack: (trackId: string) => {
@@ -69,7 +67,7 @@ const SwipeControls = forwardRef<SwipeControlsRef, SwipeControlsProps>(
 
         return (
             <View style={styles.swipeControls}>
-                <Animated.View style={[styles.progressBar, { width: progressWidth }]} />
+                <Animated.View style={[styles.progressBar, progressStyle]} />
 
                 <TouchableOpacity
                     style={[styles.swipeButton, { paddingLeft: 30 }]}
@@ -148,8 +146,9 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 5,
+        width: "100%",
         backgroundColor: color.regular,
-        borderRadius: 10,
+        transformOrigin: "left",
     },
 });
 

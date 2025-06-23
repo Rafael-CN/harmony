@@ -18,6 +18,7 @@ import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { ProfileData } from "../../types";
 import { useUser } from "../../api/profile";
+import { HButton, HTextInput } from "../common";
 
 interface ProfileEditModalProps {
     profile: ProfileData | null;
@@ -134,8 +135,8 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
                             </TouchableOpacity>
                         </View>
 
-                        <TextInput
-                            style={styles.modalInput}
+                        <HTextInput
+                            style={{ width: "100%" }}
                             placeholder="Nome de exibição"
                             placeholderTextColor={color.light}
                             value={editedProfile?.displayName}
@@ -143,8 +144,8 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
                                 setEditedProfile({ ...editedProfile!, displayName: value })
                             }
                         />
-                        <TextInput
-                            style={styles.modalInput}
+                        <HTextInput
+                            style={{ width: "100%" }}
                             placeholder="Bio"
                             multiline
                             placeholderTextColor={color.light}
@@ -154,24 +155,12 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
                             }
                         />
 
-                        <TouchableOpacity onPress={handleSaveChanges} disabled={isSaving}>
-                            <LinearGradient
-                                colors={
-                                    isSaving
-                                        ? [color.dark, color.dark]
-                                        : [color.regular, color.dark]
-                                }
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                                style={styles.modalButton}
-                            >
-                                {isSaving ? (
-                                    <ActivityIndicator color={color.extraLight} />
-                                ) : (
-                                    <Text style={styles.modalButtonText}>Salvar</Text>
-                                )}
-                            </LinearGradient>
-                        </TouchableOpacity>
+                        <HButton
+                            style={{ width: "100%" }}
+                            onPress={handleSaveChanges}
+                            disabled={isSaving}
+                            text="Salvar"
+                        />
                     </View>
                 </BlurView>
             </KeyboardAvoidingView>
@@ -192,7 +181,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 20,
         borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.1)",
+        borderColor: color.dark,
     },
 
     modalHeader: {
@@ -212,36 +201,8 @@ const styles = StyleSheet.create({
         padding: 5,
     },
 
-    modalInput: {
-        backgroundColor: color.dark,
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        fontSize: 16,
-        fontFamily: "Nexa-Light",
-        color: color.extraLight,
-        borderWidth: 1,
-        borderColor: color.light,
-        marginBottom: 20,
-    },
-
-    modalButton: {
-        width: "100%",
-        padding: 15,
-        borderRadius: 10,
-        alignItems: "center",
-    },
-
-    modalButtonText: {
-        color: color.extraLight,
-        fontSize: 16,
-        fontFamily: "Nexa-Bold",
-        textAlign: "center",
-    },
-
     profilePictureContainer: {
         alignItems: "center",
-        marginBottom: 20,
     },
 
     profilePicture: {

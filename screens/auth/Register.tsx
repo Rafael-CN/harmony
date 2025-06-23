@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { useAuth } from "../../api/auth";
 import HTextInput from "../../components/common/HTextInput";
+import { HButton } from "../../components/common";
 
 export default function Register() {
     const navigator = useNavigation();
@@ -72,13 +73,7 @@ export default function Register() {
                             onChangeText={(value) => setUser({ ...user, password: value })}
                         />
 
-                        <TouchableOpacity
-                            style={[styles.button, signingUp && styles.buttonDisabled]}
-                            onPress={handleSignUp}
-                            disabled={signingUp}
-                        >
-                            <Text style={styles.buttonText}>Cadastrar</Text>
-                        </TouchableOpacity>
+                        <HButton onPress={handleSignUp} disabled={signingUp} text="Cadastrar" />
 
                         <Pressable style={styles.link} onPress={goToLogin}>
                             <Text style={styles.linkText}>Já possui uma conta?</Text>

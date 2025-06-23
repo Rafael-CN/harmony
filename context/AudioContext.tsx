@@ -25,15 +25,33 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     const [playbackDuration, setPlaybackDuration] = useState(30000);
     const musicApi = useMusic();
 
+    const handleStatusUpdate = (status: any) => {
+        if (!status.isLoaded) {
+            if (status.error) {
+                console.error(`Error during playback: ${status.error}`);
+                stopTrack();
+            }
+            return;
+        }
+        setIsPlaying(status.isPlaying);
+        setPlaybackPosition(status.positionMillis);
+
+        if (status.didJustFinish) {
+            setIsPlaying(false);
+            setPlaybackPosition(0);
+        }
+    };
+
     const stopTrack = async () => {
         if (sound) {
             await sound.stopAsync();
             await sound.unloadAsync();
-            setSound(null);
-            setIsPlaying(false);
-            setCurrentTrackId(null);
-            setPlaybackPosition(0);
         }
+
+        setSound(null);
+        setIsPlaying(false);
+        setCurrentTrackId(null);
+        setPlaybackPosition(0);
     };
 
     const playTrack = async (trackId: string) => {
@@ -51,7 +69,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
         try {
             setIsLoading(true);
             setCurrentTrackId(trackId);
-            const previewUrl = await musicApi.getTrackPreview(trackId);
+            const previewUrl = await musicApi.getSongPreview(trackId);
             if (!previewUrl) {
                 throw new Error("No preview URL");
             }
@@ -69,24 +87,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
             }
 
             setSound(newSound);
-            setIsPlaying(true);
-
-            newSound.setOnPlaybackStatusUpdate((status) => {
-                if (!status.isLoaded) {
-                    if (status.error) {
-                        console.error(`Error during playback: ${status.error}`);
-                        stopTrack();
-                    }
-                    return;
-                }
-                setIsPlaying(status.isPlaying);
-                setPlaybackPosition(status.positionMillis);
-
-                if (status.didJustFinish) {
-                    setIsPlaying(false);
-                    setPlaybackPosition(0);
-                }
-            });
+            newSound.setOnPlaybackStatusUpdate(handleStatusUpdate);
         } catch (error) {
             console.error("Error playing track:", error);
             setCurrentTrackId(null);
@@ -97,6 +98,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
 
     const togglePlayback = async () => {
         if (!sound) return;
+
         if (isPlaying) {
             await sound.pauseAsync();
         } else {
@@ -107,7 +109,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
                 await sound.playAsync();
             }
         }
-        setIsPlaying(!isPlaying);
+        // setIsPlaying(!isPlaying);
     };
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
@@ -9,7 +9,7 @@ import { useMusic } from "../../api/music";
 import { Music } from "../../types";
 import { useProfile } from "../../hooks/useProfile";
 import { useDiscovery } from "../../api";
-import { MusicRow } from "../../components/common";
+import { MusicRow, SkeletonLoader } from "../../components/common";
 
 export default function Home() {
     const musicApi = useMusic();
@@ -18,14 +18,24 @@ export default function Home() {
     const [likedMusics, setLikedMusics] = useState<Array<Music>>([]);
     const [recommendedMusics, setRecommendedMusics] = useState<Array<Music>>([]);
 
-    const { profile, isLoading } = useProfile();
+    const { profile } = useProfile();
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        const [likedMusics, recommendedMusics] = await Promise.all([
+            musicApi.getLikedSongs(5),
+            discoveryApi.getRecommendedMusics(),
+        ]);
+
+        setLikedMusics(likedMusics.slice(0, 2));
+        setRecommendedMusics(recommendedMusics);
+        setIsLoading(false);
+    };
 
     useEffect(() => {
-        musicApi.getLikedSongs(5).then((songs) => {
-            setLikedMusics(songs.slice(0, 2));
-
-            discoveryApi.getRecommendedMusics().then(setRecommendedMusics);
-        });
+        fetchData();
     }, []);
 
     const renderListHeader = () => {
@@ -43,9 +53,9 @@ export default function Home() {
 
                 <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Curtidas recentes</Text>
-                    <TouchableOpacity>
+                    {/* <TouchableOpacity>
                         <Text style={styles.sectionLink}>Ver todas</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </>
         );
@@ -59,15 +69,34 @@ export default function Home() {
                         <Text style={styles.sectionTitle}>Músicas recomendadas</Text>
                     </View>
 
-                    <FlatList
-                        data={recommendedMusics}
-                        renderItem={({ item }) => <MusicCard music={item} />}
-                        keyExtractor={(item) => item.id}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        fadingEdgeLength={50}
-                        contentContainerStyle={{ gap: 15, paddingRight: 20 }}
-                    />
+                    {isLoading ? (
+                        <ScrollView
+                            contentContainerStyle={{
+                                flexDirection: "row",
+                                gap: 15,
+                                paddingRight: 20,
+                            }}
+                            horizontal
+                            fadingEdgeLength={50}
+                        >
+                            {[...Array(3)].map((_, i) => (
+                                <SkeletonLoader
+                                    key={i}
+                                    style={{ width: 135, height: 180, borderRadius: 10 }}
+                                />
+                            ))}
+                        </ScrollView>
+                    ) : (
+                        <FlatList
+                            data={recommendedMusics}
+                            renderItem={({ item }) => <MusicCard music={item} />}
+                            keyExtractor={(item) => item.id}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            fadingEdgeLength={50}
+                            contentContainerStyle={{ gap: 15, paddingRight: 20 }}
+                        />
+                    )}
                 </View>
             </>
         );
@@ -80,13 +109,24 @@ export default function Home() {
                 <HomeHeader profile={profile} />
 
                 <FlatList
-                    data={likedMusics}
+                    data={isLoading ? [...Array(2)] : likedMusics}
                     renderItem={({ item }) => (
                         <View style={{ paddingHorizontal: 20 }}>
-                            <MusicRow music={item} />
+                            {isLoading ? (
+                                <SkeletonLoader
+                                    style={{
+                                        width: "100%",
+                                        height: 75,
+                                        borderRadius: 10,
+                                        marginBottom: 20,
+                                    }}
+                                />
+                            ) : (
+                                <MusicRow music={item} />
+                            )}
                         </View>
                     )}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, i) => item?.id || i.toString()}
                     ListHeaderComponent={renderListHeader}
                     ListFooterComponent={renderListFooter}
                     contentContainerStyle={{ paddingBottom: 20 }}
@@ -134,5 +174,11 @@ const styles = StyleSheet.create({
         gap: 10,
         marginBottom: 20,
         paddingHorizontal: 20,
+    },
+
+    loadingCard: {
+        width: 50,
+        height: 100,
+        marginBottom: 20,
     },
 });

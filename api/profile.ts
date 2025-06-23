@@ -3,16 +3,6 @@ import { useAxios } from "./apiClient";
 
 const axios = useAxios();
 
-async function getUsername(): Promise<string> {
-    const response = await axios.get("user/name", true);
-    return response?.data.username;
-}
-
-async function getDisplayName(): Promise<string> {
-    const response = await axios.get("profile/name", true);
-    return response?.data.displayName;
-}
-
 async function getProfile(): Promise<ProfileData> {
     const response = await axios.get("profile/me", true);
     return response?.data;
@@ -20,6 +10,11 @@ async function getProfile(): Promise<ProfileData> {
 
 async function updateProfile(displayName: string, bio: string): Promise<boolean> {
     const response = await axios.put("profile/me", { displayName, bio }, true);
+    return response?.status === 200;
+}
+
+async function updateProfileNowMusic(nowMusicId: string): Promise<boolean> {
+    const response = await axios.put("profile/me", { nowMusicId }, true);
     return response?.status === 200;
 }
 
@@ -48,12 +43,17 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
     }
 }
 
+async function followUser(username: string): Promise<boolean> {
+    const response = await axios.post(`profile/follow/${username}`, {}, true);
+    return response?.status === 200;
+}
+
 export function useUser() {
     return {
-        getUsername,
-        getDisplayName,
         getProfile,
         updateProfile,
         updateProfilePicture,
+        updateProfileNowMusic,
+        followUser,
     };
 }
