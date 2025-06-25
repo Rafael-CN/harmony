@@ -27,7 +27,7 @@ namespace Harmony.Controllers
             return await userManager.FindByNameAsync(username);
         }
 
-        [HttpGet("liked/last")]
+        [HttpGet("liked")]
         public async Task<IActionResult> GetLastLikedSongs([FromQuery] int limit = 5)
         {
             var user = await GetUser();
@@ -37,6 +37,18 @@ namespace Harmony.Controllers
             if (musics == null) return BadRequest(new { Message = "Náo foi possível obter as últimas músicas curtidas" });
 
             return Ok(musics);
+        }
+
+        [HttpPost("liked")]
+        public async Task<IActionResult> SetLikedSongs([FromBody] List<string> trackIds)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            var success = await spotifyService.SetLikedSongs(user, trackIds);
+            if (!success) return BadRequest(new { Message = "Não foi possível curtir as músicas" });
+
+            return Ok(new { Message = "Músicas curtidas com sucesso" });
         }
 
         [HttpGet("search")]
@@ -51,18 +63,6 @@ namespace Harmony.Controllers
             return Ok(musics);
         }
 
-        [HttpGet("artist/{artistId}")]
-        public async Task<IActionResult> GetArtist(string artistId)
-        {
-            var user = await GetUser();
-            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
-
-            var artist = await spotifyService.GetArtist(user, artistId);
-            if (artist == null) return BadRequest(new { Message = "Não foi possível encontrar o artista" });
-
-            return Ok(artist);
-        }
-
         [HttpGet("artists")]
         public async Task<IActionResult> GetArtists([FromQuery] List<string> ids)
         {
@@ -75,6 +75,17 @@ namespace Harmony.Controllers
             return Ok(artists);
         }
 
+        [HttpGet("{trackId}")]
+        public async Task<IActionResult> GetTrack(string trackId)
+        {
+            var user = await GetUser();
+            if (user == null) return Unauthorized(new { Message = "Usuário não encontrado" });
+
+            var music = await spotifyService.GetSong(user, trackId);
+            if (music == null) return BadRequest(new { Message = "Não foi possível encontrar a música" });
+
+            return Ok(music);
+        }
 
         [HttpGet("{trackId}/preview")]
         public async Task<IActionResult> GetTrackPreview(string trackId)

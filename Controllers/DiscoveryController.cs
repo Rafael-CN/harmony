@@ -66,7 +66,8 @@ namespace Harmony.Controllers
                     Username = recommendedUser.UserName!,
                     DisplayName = recommendedUser.Profile?.DisplayName! ?? recommendedUser.UserName!,
                     ProfilePictureUrl = recommendedUser.Profile?.ProfilePictureUrl,
-                    CompatibilityScore = doc.Score
+                    CompatibilityScore = doc.Score,
+                    NowMusicId = recommendedUser.Profile?.NowMusicId
                 };
             }).Where(u => u != null).ToList();
 

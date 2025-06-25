@@ -49,7 +49,7 @@ namespace Harmony.Services.Photos
 
             if (deletionResult.Error != null)
             {
-                _logger.LogInformation("Houve um erro ao salvar a foto: {Error}", deletionResult.Error.Message);
+                _logger.LogInformation("Houve um erro ao deletar a foto: {Error}", deletionResult.Error.Message);
             }
 
             return deletionResult;

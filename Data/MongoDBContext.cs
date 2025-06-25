@@ -1,3 +1,4 @@
+using Harmony.Model;
 using Harmony.Models;
 using MongoDB.Driver;
 
@@ -7,9 +8,12 @@ namespace Harmony.Data
     {
         private readonly IMongoDatabase _database;
 
-        public IMongoCollection<User> Users { get; }
-        public IMongoCollection<Follow> Follows { get; }
-        public IMongoCollection<UserCompatibility> UserCompatibilities { get; }
+        public IMongoCollection<User> Users => _database.GetCollection<User>("Users");
+        public IMongoCollection<Follow> Follows => _database.GetCollection<Follow>("Follows");
+        public IMongoCollection<UserCompatibility> UserCompatibilities => _database.GetCollection<UserCompatibility>("UserCompatibilities");
+
+        public IMongoCollection<Chat> Chats => _database.GetCollection<Chat>("Chats");
+        public IMongoCollection<Message> Messages => _database.GetCollection<Message>("Messages");
 
         public MongoDBContext(IConfiguration configuration)
         {
@@ -30,9 +34,11 @@ namespace Harmony.Data
             var client = new MongoClient(mongoUrl);
             _database = client.GetDatabase(databaseName);
 
-            Users = _database.GetCollection<User>("Users");
-            Follows = _database.GetCollection<Follow>("Follows");
-            UserCompatibilities = _database.GetCollection<UserCompatibility>("UserCompatibilities");
+            var chatIndexKeysDefinition = Builders<Chat>.IndexKeys.Ascending(c => c.ParticipantsIds);
+            Chats.Indexes.CreateOneAsync(new CreateIndexModel<Chat>(chatIndexKeysDefinition));
+
+            var messageIndexKeysDefinition = Builders<Message>.IndexKeys.Ascending(m => m.ChatId);
+            Messages.Indexes.CreateOneAsync(new CreateIndexModel<Message>(messageIndexKeysDefinition));
         }
     }
 }

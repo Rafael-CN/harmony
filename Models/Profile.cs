@@ -12,6 +12,8 @@ namespace Harmony.Models
         public string? Bio { get; set; }
 
         public string? ProfilePictureUrl { get; set; }
+        public string? ProfilePictureId { get; set; }
+
         public string? NowMusicId { get; set; }
     }
 }

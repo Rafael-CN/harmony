@@ -76,16 +76,6 @@ namespace Harmony.Controllers
         }
 
         [Authorize]
-        [HttpGet("name")]
-        public IActionResult GetUsername()
-        {
-            var username = User.FindFirstValue(ClaimTypes.Name);
-            if (username == null) return Unauthorized(new { Message = "Usuário não encontrado" });
-
-            return Ok(new { Username = username });
-        }
-
-        [Authorize]
         [HttpPost("spotify/link")]
         public async Task<IActionResult> LinkSpotifyAccount([FromBody] SpotifyLinkDTO model)
         {

@@ -56,13 +56,13 @@ namespace Harmony.Controllers
 
             var publicProfile = new PublicProfileDTO(user)
             {
-                Status = status
+                Status = status,
             };
 
             return Ok(publicProfile);
         }
 
-        [HttpPost("{username}/follow")]
+        [HttpPost("follow/{username}")]
         public async Task<IActionResult> FollowProfile(string username)
         {
             var user = await GetUser();
@@ -79,7 +79,7 @@ namespace Harmony.Controllers
             return Ok(new { Message = "Perfil seguido com sucesso" });
         }
 
-        [HttpPost("{username}/unfollow")]
+        [HttpPost("unfollow/{username}")]
         public async Task<IActionResult> UnfollowProfile(string username)
         {
             var user = await GetUser();
@@ -103,6 +103,7 @@ namespace Harmony.Controllers
             user.Profile ??= new Profile();
             user.Profile.DisplayName = model.DisplayName ?? user.Profile.DisplayName;
             user.Profile.Bio = model.Bio ?? user.Profile.Bio;
+            user.Profile.NowMusicId = model.NowMusicId ?? user.Profile.NowMusicId;
 
             var result = await userManager.UpdateAsync(user);
 
@@ -113,8 +114,7 @@ namespace Harmony.Controllers
 
             return BadRequest(new { Message = "Não foi possível atualizar o perfil" });
         }
-
-
+        
         [HttpPost("me/photo")]
         public async Task<IActionResult> AddProfilePhoto([FromForm] IFormFile file)
         {
@@ -123,11 +123,16 @@ namespace Harmony.Controllers
 
             if (file == null || file.Length <= 0) return BadRequest(new { Message = "Nenhum arquivo enviado." });
 
+            if (!string.IsNullOrEmpty(user.Profile?.ProfilePictureId)) {
+                await photoService.DeletePhotoAsync(user.Profile.ProfilePictureId);
+            }
+
             var uploadResult = await photoService.AddPhotoAsync(file);
             if (uploadResult.Error != null) return BadRequest(new { Message = "Houve um erro ao salvar a foto" });
 
             user.Profile ??= new Profile(user.UserName!);
             user.Profile.ProfilePictureUrl = uploadResult.SecureUrl.ToString();
+            user.Profile.ProfilePictureId = uploadResult.PublicId;
 
             var result = await userManager.UpdateAsync(user);
 
