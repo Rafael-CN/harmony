@@ -1,15 +1,32 @@
 import { useFonts } from "expo-font";
-import { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import * as SplashScreen from "expo-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Login, Register, Spotify } from "./screens/auth";
 import TabNavigator from "./navigation/TabNavigator";
-import FindNavigator from "./navigation/FindNavigator";
 import { View } from "react-native";
 import { color } from "./theme.json";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-SplashScreen.preventAutoHideAsync();
+const Stack = createNativeStackNavigator();
+
+const AppNavigator = () => {
+    const { userToken, isLinkedSpotify } = useAuth();
+
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom" }}>
+            {userToken && isLinkedSpotify ? (
+                <Stack.Screen name="TabNavigator" component={TabNavigator}></Stack.Screen>
+            ) : userToken ? (
+                <Stack.Screen name="Spotify" component={Spotify}></Stack.Screen>
+            ) : (
+                <>
+                    <Stack.Screen name="Login" component={Login}></Stack.Screen>
+                    <Stack.Screen name="Register" component={Register}></Stack.Screen>
+                </>
+            )}
+        </Stack.Navigator>
+    );
+};
 
 export default function App() {
     const [loaded, error] = useFonts({
@@ -20,28 +37,16 @@ export default function App() {
         "Nexa-ExtraLight": require("./assets/fonts/Nexa-ExtraLight.ttf"),
     });
 
-    useEffect(() => {
-        if (loaded || error) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded, error]);
-
     if (!loaded && !error) {
         return null;
     }
 
-    const Stack = createNativeStackNavigator();
-
     return (
         <NavigationContainer>
             <View style={{ flex: 1, backgroundColor: color.extraDark }}>
-                <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom" }} initialRouteName="Login">
-                    <Stack.Screen name="Login" component={Login}></Stack.Screen>
-                    <Stack.Screen name="Register" component={Register}></Stack.Screen>
-                    <Stack.Screen name="Spotify" component={Spotify}></Stack.Screen>
-                    <Stack.Screen name="TabNavigator" component={TabNavigator}></Stack.Screen>
-                    <Stack.Screen name="FindNavigator" component={FindNavigator} options={{ presentation: "transparentModal", animation: "none" }}></Stack.Screen>
-                </Stack.Navigator>
+                <AuthProvider>
+                    <AppNavigator />
+                </AuthProvider>
             </View>
         </NavigationContainer>
     );

@@ -19,6 +19,7 @@ export interface Artist {
 }
 
 export interface ProfileData {
+    userId: string;
     displayName: string;
     username: string;
     profilePictureUrl: string;
@@ -41,4 +42,29 @@ export interface RecommendedUser {
     compatibilityScore: number;
     bio?: string;
     nowMusicId: string;
+}
+
+export interface Chat {
+    chatId: string;
+
+    otherParticipant: {
+        username: string;
+        displayName: string;
+        profilePictureUrl: string;
+    };
+
+    lastMessage: string;
+    lastMessageAt: string;
+}
+
+export interface ChatMessage {
+    id: string;
+
+    content: string;
+
+    senderId: string;
+
+    isMe: boolean;
+
+    createdAt: string;
 }

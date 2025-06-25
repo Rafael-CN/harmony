@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { Audio } from "expo-av";
-import { useMusic } from "../api";
+import { useMusicApi } from "../api";
 
 interface IAudioContext {
     playTrack: (trackId: string) => void;
@@ -23,7 +23,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
     const [playbackPosition, setPlaybackPosition] = useState(0);
     const [playbackDuration, setPlaybackDuration] = useState(30000);
-    const musicApi = useMusic();
+    const musicApi = useMusicApi();
 
     const handleStatusUpdate = (status: any) => {
         if (!status.isLoaded) {

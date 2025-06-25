@@ -4,14 +4,14 @@ import { color } from "../../theme.json";
 import SwipeCard, { SwipeCardRef } from "../../components/find/SwipeCard";
 import { useEffect, useRef, useState } from "react";
 import { Music } from "../../types";
-import { useDiscovery } from "../../api";
+import { useDiscoveryApi } from "../../api";
 import SwipeControls, { SwipeControlsRef } from "../../components/find/SwipeControls";
 import FindMusicCard from "../../components/find/FindMusicCard";
 
 const { width } = Dimensions.get("window");
 
 export default function FindMusic() {
-    const discoveryApi = useDiscovery();
+    const discoveryApi = useDiscoveryApi();
 
     const [hasMoreMusics, setHasMoreMusics] = useState(true);
     const [musicQueue, setMusicQueue] = useState<Music[]>([]);

@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import SwipeCard, { SwipeCardRef } from "../../components/find/SwipeCard";
 import { useEffect, useRef, useState } from "react";
-import { useDiscovery, useUser } from "../../api";
+import { useDiscoveryApi, useUserApi } from "../../api";
 import SwipeControls, { SwipeControlsRef } from "../../components/find/SwipeControls";
 import { RecommendedUser } from "../../types";
 import FindUserCard from "../../components/find/FindUserCard";
@@ -11,8 +11,8 @@ import FindUserCard from "../../components/find/FindUserCard";
 const { width } = Dimensions.get("window");
 
 export default function FindProfile() {
-    const discoveryApi = useDiscovery();
-    const userApi = useUser();
+    const discoveryApi = useDiscoveryApi();
+    const userApi = useUserApi();
 
     const [userPage, setUserPage] = useState(1);
     const [hasMoreUsers, setHasMoreUsers] = useState(true);

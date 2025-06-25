@@ -1,6 +1,6 @@
-import React, { createContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useState, useEffect, ReactNode, useContext } from "react";
 import { ProfileData } from "../types";
-import { useUser } from "../api/profile";
+import { useProfileApi } from "../api/profile";
 
 interface IProfileContext {
     profile: ProfileData | null;
@@ -14,7 +14,7 @@ export const ProfileContext = createContext<IProfileContext | undefined>(undefin
 export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const profileApi = useUser();
+    const profileApi = useProfileApi();
 
     const fetchProfile = async () => {
         try {
@@ -44,4 +44,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             {children}
         </ProfileContext.Provider>
     );
+};
+
+export const useProfile = () => {
+    const context = useContext(ProfileContext);
+    if (context === undefined) {
+        throw new Error("useProfile must be used within a ProfileProvider");
+    }
+    return context;
 };

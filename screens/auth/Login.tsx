@@ -1,27 +1,18 @@
 import { StatusBar } from "expo-status-bar";
-import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
-import { useAuth } from "../../api/auth";
 import HTextInput from "../../components/common/HTextInput";
 import { HButton } from "../../components/common";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
     const navigator = useNavigation();
-    const authService = useAuth();
+    const { login } = useAuth();
 
     const [signingIn, setSigningIn] = useState(false);
     const [isInvalid, setInvalid] = useState(false);
@@ -36,24 +27,13 @@ export default function Login() {
         setInvalid(false);
         setSigningIn(true);
 
-        const response = await authService.login(user.name, user.password);
-        if (response.succeeded) {
-            AsyncStorage.setItem("token", response.token);
-            navigator.navigate("Spotify" as never);
-        } else {
+        const response = await login(user.name, user.password);
+        if (!response.succeeded) {
             setInvalid(true);
         }
 
         setSigningIn(false);
     };
-
-    useEffect(() => {
-        // authService.isLoggedIn().then((isLoggedIn) => {
-        //     if (isLoggedIn) {
-        //         navigator.navigate("Spotify" as never);
-        //     }
-        // });
-    }, []);
 
     return (
         <>

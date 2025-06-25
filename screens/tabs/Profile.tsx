@@ -4,12 +4,12 @@ import { color } from "../../theme.json";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import { ArtistListItem, GenreTag, ProfileEditModal, ProfileInfo } from "../../components/profile";
-import { Artist, ProfileData } from "../../types";
-import { useMusic } from "../../api";
-import { useProfile } from "../../hooks/useProfile";
+import { Artist } from "../../types";
+import { useMusicApi } from "../../api";
+import { useProfile } from "../../context/ProfileContext";
 
 export default function Profile() {
-    const musicService = useMusic();
+    const musicService = useMusicApi();
 
     const { profile, fetchProfile } = useProfile();
     const [visible, setVisible] = useState(false);

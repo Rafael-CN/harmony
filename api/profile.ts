@@ -1,20 +1,18 @@
+import api from "./api";
 import { ProfileData } from "../types";
-import { useAxios } from "./apiClient";
-
-const axios = useAxios();
 
 async function getProfile(): Promise<ProfileData> {
-    const response = await axios.get("profile/me", true);
+    const response = await api.get("profile/me");
     return response?.data;
 }
 
 async function updateProfile(displayName: string, bio: string): Promise<boolean> {
-    const response = await axios.put("profile/me", { displayName, bio }, true);
+    const response = await api.put("profile/me", { displayName, bio });
     return response?.status === 200;
 }
 
 async function updateProfileNowMusic(nowMusicId: string): Promise<boolean> {
-    const response = await axios.put("profile/me", { nowMusicId }, true);
+    const response = await api.put("profile/me", { nowMusicId });
     return response?.status === 200;
 }
 
@@ -28,8 +26,10 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
     } as any);
 
     try {
-        const response = await axios.post("profile/me/photo", formData, true, {
-            "Content-Type": "multipart/form-data",
+        const response = await api.post("profile/me/photo", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
         });
 
         if (response && response.status === 200 && response.data.url) {
@@ -44,11 +44,11 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
 }
 
 async function followUser(username: string): Promise<boolean> {
-    const response = await axios.post(`profile/follow/${username}`, {}, true);
+    const response = await api.post(`profile/follow/${username}`, {});
     return response?.status === 200;
 }
 
-export function useUser() {
+export function useProfileApi() {
     return {
         getProfile,
         updateProfile,

@@ -2,11 +2,13 @@ import { BottomTabBarButtonProps, createBottomTabNavigator } from "@react-naviga
 import { Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../theme.json";
-import { Home, Chat, Search, Profile } from "../screens/tabs";
+import { Home, Search, Profile } from "../screens/tabs";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import FindNavigator from "./FindNavigator";
 import { ProfileProvider } from "../context/ProfileContext";
 import { AudioProvider, useAudio } from "../context/AudioContext";
+import ChatNavigator from "./ChatNavigator";
+import FindNavigator from "./FindNavigator";
+import { ChatProvider } from "../context/ChatContext";
 
 interface TabIconProps {
     name: keyof typeof Ionicons.glyphMap;
@@ -121,7 +123,7 @@ const Tabs = () => {
 
             <Tab.Screen
                 name="Chat"
-                component={Chat}
+                component={ChatNavigator}
                 options={{
                     tabBarIcon: ({ color, focused }) => (
                         <CustomTabIcon
@@ -154,7 +156,9 @@ export default function TabNavigator() {
         <View style={{ flex: 1 }}>
             <AudioProvider>
                 <ProfileProvider>
-                    <Tabs />
+                    <ChatProvider>
+                        <Tabs />
+                    </ChatProvider>
                 </ProfileProvider>
             </AudioProvider>
         </View>

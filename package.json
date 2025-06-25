@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.7",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.1.9",
@@ -16,7 +17,7 @@
     "axios": "^1.8.3",
     "expo": "53.0.12",
     "expo-auth-session": "~6.2.0",
-    "expo-av": "~15.1.6",
+    "expo-av": "^15.1.6",
     "expo-blur": "~14.1.5",
     "expo-crypto": "~14.1.5",
     "expo-font": "~13.3.1",

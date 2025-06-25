@@ -17,7 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { ProfileData } from "../../types";
-import { useUser } from "../../api/profile";
+import { useProfileApi } from "../../api/profile";
 import { HButton, HTextInput } from "../common";
 
 interface ProfileEditModalProps {
@@ -28,7 +28,7 @@ interface ProfileEditModalProps {
 }
 
 const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditModalProps) => {
-    const userService = useUser();
+    const userService = useProfileApi();
 
     const [editedProfile, setEditedProfile] = useState<ProfileData | null>(null);
 

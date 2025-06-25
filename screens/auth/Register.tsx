@@ -1,26 +1,17 @@
 import { StatusBar } from "expo-status-bar";
-import {
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
-import { useAuth } from "../../api/auth";
 import HTextInput from "../../components/common/HTextInput";
 import { HButton } from "../../components/common";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Register() {
     const navigator = useNavigation();
-    const authService = useAuth();
+    const { register } = useAuth();
 
     const goToLogin = () => {
         navigator.goBack();
@@ -32,7 +23,7 @@ export default function Register() {
     const handleSignUp = async () => {
         setSigningUp(true);
 
-        const response = await authService.register(user.username, user.password);
+        const response = await register(user.username, user.password);
         if (response.succeeded) {
             navigator.navigate("Login" as never);
         } else {

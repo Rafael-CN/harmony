@@ -2,9 +2,8 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { makeRedirectUri, ResponseType, useAuthRequest } from "expo-auth-session";
 import { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useAuth } from "../../api/auth";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Spotify() {
     const redirectUri = makeRedirectUri();
@@ -32,29 +31,14 @@ export default function Spotify() {
 
     const [disabled, setDisabled] = useState(false);
 
-    const navigator = useNavigation();
-    const authService = useAuth();
-
-    useEffect(() => {
-        setDisabled(true);
-
-        authService.isLinkedSpotify().then((isLinked) => {
-            if (isLinked) {
-                navigator.navigate("TabNavigator" as never);
-            }
-
-            setDisabled(false);
-        });
-    }, []);
+    const { linkSpotify } = useAuth();
 
     useEffect(() => {
         if (response && response.type === "success") {
             setDisabled(true);
 
-            authService.linkSpotify(response.params.code).then((succeeded) => {
-                if (succeeded) {
-                    navigator.navigate("TabNavigator" as never);
-                } else {
+            linkSpotify(response.params.code).then((succeeded) => {
+                if (!succeeded) {
                     alert("Houve um erro ao logar com o Spotify");
                 }
 

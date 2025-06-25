@@ -5,15 +5,15 @@ import { StatusBar } from "expo-status-bar";
 import { color } from "../../theme.json";
 import React, { useEffect, useState } from "react";
 import { HomeHeader, MusicCard, StatusBox } from "../../components/home";
-import { useMusic } from "../../api/music";
+import { useMusicApi } from "../../api/music";
 import { Music } from "../../types";
-import { useProfile } from "../../hooks/useProfile";
-import { useDiscovery } from "../../api";
+import { useDiscoveryApi } from "../../api";
 import { MusicRow, SkeletonLoader } from "../../components/common";
+import { useProfile } from "../../context/ProfileContext";
 
 export default function Home() {
-    const musicApi = useMusic();
-    const discoveryApi = useDiscovery();
+    const musicApi = useMusicApi();
+    const discoveryApi = useDiscoveryApi();
 
     const [likedMusics, setLikedMusics] = useState<Array<Music>>([]);
     const [recommendedMusics, setRecommendedMusics] = useState<Array<Music>>([]);

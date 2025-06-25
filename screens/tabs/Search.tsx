@@ -5,9 +5,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "../../types";
-import { useMusic } from "../../api/music";
+import { useMusicApi } from "../../api/music";
 import { MusicRow } from "../../components/common";
-import { useUser } from "../../api";
+import { useUserApi } from "../../api";
 
 export default function Search() {
     const textColor = color.extraLight;
@@ -17,8 +17,8 @@ export default function Search() {
         if (inputRef.current) inputRef.current.focus();
     });
 
-    const musicApi = useMusic();
-    const userApi = useUser();
+    const musicApi = useMusicApi();
+    const userApi = useUserApi();
 
     const [querySongs, setQuerySongs] = useState<Array<Music> | null>(null);
     const [search, setSearch] = useState("");
