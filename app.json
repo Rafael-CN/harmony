@@ -6,7 +6,7 @@
         "version": "0.1.0",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
-        "userInterfaceStyle": "light",
+        "userInterfaceStyle": "dark",
         "newArchEnabled": true,
         "splash": {
             "image": "./assets/harmony.png",
@@ -17,15 +17,13 @@
             "supportsTablet": true
         },
         "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
-            },
             "package": "com.ytay.harmony"
         },
-        "web": {
-            "favicon": "./assets/favicon.png"
-        },
-        "plugins": ["expo-font"]
+        "plugins": ["expo-font"],
+        "extra": {
+            "eas": {
+                "projectId": "85a73c7a-a618-47b9-b1ab-5687a495514c"
+            }
+        }
     }
 }

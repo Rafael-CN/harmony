@@ -47,7 +47,7 @@ export default function Profile() {
 
                     <View style={styles.stats}>
                         <View style={styles.statsContainer}>
-                            <Text style={styles.statsValue}>{profile?.status.likedCount}</Text>
+                            <Text style={styles.statsValue}>{profile?.status.likedCount || 0}</Text>
                             <Text style={styles.statsTitle}>Curtidas</Text>
                         </View>
 

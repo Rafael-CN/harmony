@@ -21,14 +21,12 @@ const MessageBubble = ({ message, index }: { message: ChatMessage; index: number
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 400,
-                delay: index * 50,
+                duration: 250,
                 useNativeDriver: true,
             }),
             Animated.timing(slideAnim, {
                 toValue: 0,
-                duration: 400,
-                delay: index * 50,
+                duration: 250,
                 useNativeDriver: true,
             }),
         ]).start();

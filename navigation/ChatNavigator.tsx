@@ -1,5 +1,4 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { FindMusic, FindUser, Main } from "../screens/find";
 import { View } from "react-native";
 import { color } from "../theme.json";
 import ChatList from "../screens/chat/ChatList";
