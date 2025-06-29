@@ -1,5 +1,6 @@
 ﻿using Harmony.Controllers.DTOs.Profile;
 using Harmony.Models;
+using Harmony.Services.Chats;
 using Harmony.Services.Follows;
 using Harmony.Services.Photos;
 using Harmony.Services.UserStatus;
@@ -18,7 +19,8 @@ namespace Harmony.Controllers
         UserManager<User> userManager,
         IStatusService statusService,
         IPhotoService photoService,
-        IFollowService followService
+        IFollowService followService,
+        IChatService chatService
 
     ) : ControllerBase
     {
@@ -76,7 +78,13 @@ namespace Harmony.Controllers
             var result = await followService.FollowAsync(user.Id.ToString(), targetUser.Id.ToString());
             if (!result) return BadRequest(new { Message = "Erro ao seguir o perfil" });
 
-            return Ok(new { Message = "Perfil seguido com sucesso" });
+            var isMatch = await followService.IsFollowingAsync(targetUser.Id.ToString(), user.Id.ToString());
+            if (isMatch)
+            {
+                await chatService.GetOrCreateChatAsync(user.Id.ToString(), targetUser.Id.ToString());
+            }
+
+            return Ok(new { Message = "Perfil seguido com sucesso", IsMatch = isMatch });
         }
 
         [HttpPost("unfollow/{username}")]
@@ -114,7 +122,7 @@ namespace Harmony.Controllers
 
             return BadRequest(new { Message = "Não foi possível atualizar o perfil" });
         }
-        
+
         [HttpPost("me/photo")]
         public async Task<IActionResult> AddProfilePhoto([FromForm] IFormFile file)
         {
@@ -123,7 +131,8 @@ namespace Harmony.Controllers
 
             if (file == null || file.Length <= 0) return BadRequest(new { Message = "Nenhum arquivo enviado." });
 
-            if (!string.IsNullOrEmpty(user.Profile?.ProfilePictureId)) {
+            if (!string.IsNullOrEmpty(user.Profile?.ProfilePictureId))
+            {
                 await photoService.DeletePhotoAsync(user.Profile.ProfilePictureId);
             }
 

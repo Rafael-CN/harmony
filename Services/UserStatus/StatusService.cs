@@ -35,8 +35,15 @@ namespace Harmony.Services.UserStatus
 
             status.LikedCount = await _spotifyService.GetLikedSongsCount(user);
 
-            user.Status = status;
-            var result = await _userManager.UpdateAsync(user);
+            var userSave = await _userManager.FindByIdAsync(user.Id.ToString()); 
+            if (userSave == null)
+            {
+                _logger.LogError("--> Não foi possível encontrar o usuário para atualizar seu status");
+                return false;
+            }
+
+            userSave.Status = status;
+            var result = await _userManager.UpdateAsync(userSave);
 
             if (!result.Succeeded)
             {
@@ -48,12 +55,18 @@ namespace Harmony.Services.UserStatus
 
         public async Task<Status?> GetStatus(User user)
         {
+            if (user.Credential == null) return null;
+
             if (user.Status == null || DateTime.UtcNow.AddDays(-1) > user.Status.LastUpdate)
             {
                 _logger.LogInformation("Atualizando status para o usuário {UserId}", user.Id);
-                if (!await UpdateStatus(user))
+                if (await UpdateStatus(user))
                 {
-                    return null;
+                    var updatedUser = await _userManager.FindByIdAsync(user.Id.ToString());
+                    return updatedUser?.Status;
+                } else
+                {
+                    return user.Status;
                 }
             }
 

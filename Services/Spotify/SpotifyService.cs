@@ -60,8 +60,13 @@ namespace Harmony.Services.Spotify
 
         private async Task<List<string>?> GetRecommendationsIds(User user, int limit = 5)
         {
-            var topSongs = user.Status?.TopSongs;
-            if (topSongs == null || !topSongs.Any()) return null;
+            var topSongsIds = user.Status?.TopSongs;
+            if (topSongsIds == null || !topSongsIds.Any()) {
+                var topSongs = await GetTopSongs(user, 10);
+                if (topSongs == null || !topSongs.Any()) return null;
+
+                topSongsIds = topSongs.Select(s => s.Id).ToList();
+            };
 
             var cacheKey = $"recommendations:{user.Id}";
             if (memoryCache.TryGetValue(cacheKey, out List<string>? cachedRecommendations))
@@ -69,7 +74,7 @@ namespace Harmony.Services.Spotify
                 return await FilterUnlikedSongs(user, cachedRecommendations!, limit);
             }
 
-            var recommendations = await GetRecommendationsIdsFromSeeds(user, topSongs, 50);
+            var recommendations = await GetRecommendationsIdsFromSeeds(user, topSongsIds, 50);
 
             var cacheOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromHours(24));
