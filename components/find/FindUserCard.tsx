@@ -8,11 +8,15 @@ import { color } from "../../theme.json";
 const FindUserCard = ({ user }: { user: RecommendedUser }) => {
     const [imageIsLoading, setImageIsLoading] = useState(true);
 
+    const imageSource = user.profilePictureUrl
+        ? { uri: user.profilePictureUrl }
+        : require("../../assets/users/default.png");
+
     return (
         <View style={styles.profileCard}>
             <View style={styles.profilePictureContainer}>
                 <Image
-                    source={{ uri: user.profilePictureUrl }}
+                    source={imageSource}
                     style={styles.profilePicture}
                     priority={"high"}
                     cachePolicy={"memory-disk"}

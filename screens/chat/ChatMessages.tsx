@@ -85,6 +85,10 @@ export default function ChatMessages() {
         scrollViewRef.current?.scrollToEnd({ animated: true });
     });
 
+    const imageSource = chat.otherParticipant.profilePictureUrl
+        ? { uri: chat.otherParticipant.profilePictureUrl }
+        : require("../../assets/users/default.png");
+
     return (
         <LinearGradient colors={["#000000", `${color.extraDark}99`]} style={styles.container}>
             <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
@@ -105,7 +109,7 @@ export default function ChatMessages() {
 
                             <View style={styles.avatarContainer}>
                                 <Image
-                                    source={{ uri: chat.otherParticipant.profilePictureUrl }}
+                                    source={imageSource}
                                     style={styles.headerAvatar}
                                     cachePolicy="memory-disk"
                                     priority="high"
@@ -127,6 +131,9 @@ export default function ChatMessages() {
                     style={styles.keyboardView}
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                 >
+                    {activeChatMessages.length <= 0 && (
+                        <Text style={styles.noMessages}>Nenhuma mensagem</Text>
+                    )}
                     <ScrollView
                         ref={scrollViewRef}
                         style={styles.messagesContainer}
@@ -348,5 +355,16 @@ const styles = StyleSheet.create({
 
     sendIconActive: {
         color: "white",
+    },
+
+    noMessages: {
+        position: "absolute",
+        top: "40%",
+        left: "25%",
+        color: color.light,
+        fontFamily: "Nexa-Light",
+        fontSize: 18,
+        textAlign: "center",
+        opacity: 0.7,
     },
 });

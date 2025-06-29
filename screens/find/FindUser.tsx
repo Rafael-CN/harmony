@@ -94,13 +94,24 @@ export default function FindProfile() {
     const handleSwipe = (direction: "left" | "right") => {
         setUserQueue((currentQueue) => {
             const swipedUser = currentQueue[0];
-            userApi.followUser(swipedUser.username);
+
+            if (direction === "right") {
+                handleFollow(swipedUser.username);
+            }
 
             // swipeControlsRef.current?.playTrack(newQueue[0].id);
 
             const newQueue = currentQueue.slice(1);
             return newQueue;
         });
+    };
+
+    const handleFollow = async (username: string) => {
+        const response = await userApi.followUser(username);
+        if (response.succeeded && response.isMatch) {
+            // TODO: Animação de match
+            alert("Match!");
+        }
     };
 
     const handleDislike = () => {

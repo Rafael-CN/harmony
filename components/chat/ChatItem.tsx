@@ -37,6 +37,10 @@ const ChatItem = ({ chat, index }: { chat: Chat; index: number }) => {
         ]).start();
     }, []);
 
+    const imageSource = chat.otherParticipant.profilePictureUrl
+        ? { uri: chat.otherParticipant.profilePictureUrl }
+        : require("../../assets/users/default.png");
+
     return (
         <Animated.View
             style={[
@@ -55,7 +59,7 @@ const ChatItem = ({ chat, index }: { chat: Chat; index: number }) => {
             >
                 <View style={styles.avatarContainer}>
                     <Image
-                        source={{ uri: chat.otherParticipant.profilePictureUrl }}
+                        source={imageSource}
                         style={styles.chatItemImage}
                         cachePolicy="memory-disk"
                         priority="high"
@@ -92,7 +96,7 @@ const ChatItem = ({ chat, index }: { chat: Chat; index: number }) => {
                         ]}
                         numberOfLines={1}
                     >
-                        {chat.lastMessage}
+                        {chat.lastMessage || "Sem mensagens"}
                     </Text>
 
                     {/* <Text style={styles.lastSeen}>{chat.lastSeen}</Text> */}

@@ -43,9 +43,13 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
     }
 }
 
-async function followUser(username: string): Promise<boolean> {
+async function followUser(username: string): Promise<{ isMatch: boolean; succeeded: boolean }> {
     const response = await api.post(`profile/follow/${username}`, {});
-    return response?.status === 200;
+
+    return {
+        isMatch: response?.data.isMatch,
+        succeeded: response?.status == 200,
+    };
 }
 
 export function useProfileApi() {

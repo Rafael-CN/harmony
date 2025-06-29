@@ -10,7 +10,7 @@ interface IAuthContext {
     login: (username: string, password: string) => Promise<any>;
     logout: () => void;
     register: (username: string, password: string) => Promise<any>;
-    linkSpotify: (code: string) => Promise<any>;
+    linkSpotify: (code: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
@@ -53,6 +53,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (response) {
             setIsLinkedSpotify(true);
         }
+
+        return response;
     };
 
     useEffect(() => {

@@ -54,7 +54,7 @@ export default function Register() {
                             onChangeText={(value) => setUser({ ...user, username: value })}
                         />
 
-                        <HTextInput placeholder="Email" placeholderTextColor={color.light} />
+                        {/* <HTextInput placeholder="Email" placeholderTextColor={color.light} /> */}
 
                         <HTextInput
                             placeholder="Senha"

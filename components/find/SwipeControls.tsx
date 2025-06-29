@@ -79,7 +79,7 @@ const SwipeControls = forwardRef<SwipeControlsRef, SwipeControlsProps>(
 
                 <TouchableOpacity
                     style={styles.playButton}
-                    disabled={disabled}
+                    disabled={disabled || trackId === null}
                     onPress={handlePlay}
                 >
                     {isThisTrackLoading ? (
@@ -91,7 +91,11 @@ const SwipeControls = forwardRef<SwipeControlsRef, SwipeControlsProps>(
                     ) : isThisTrackPlaying ? (
                         <Ionicons name="pause" style={styles.playIcon} color={color.extraLight} />
                     ) : (
-                        <Ionicons name="play" style={styles.playIcon} color={color.extraLight} />
+                        <Ionicons
+                            name={trackId === null ? "ban-outline" : "play"}
+                            style={styles.playIcon}
+                            color={trackId === null ? `${color.extraLight}60` : color.extraLight}
+                        />
                     )}
                 </TouchableOpacity>
 
