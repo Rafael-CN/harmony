@@ -86,7 +86,7 @@ export default function Home() {
                                 />
                             ))}
                         </ScrollView>
-                    ) : (
+                    ) : recommendedMusics && recommendedMusics.length > 0 ? (
                         <FlatList
                             data={recommendedMusics}
                             renderItem={({ item }) => <MusicCard music={item} />}
@@ -96,6 +96,10 @@ export default function Home() {
                             fadingEdgeLength={50}
                             contentContainerStyle={{ gap: 15, paddingRight: 20 }}
                         />
+                    ) : (
+                        <Text style={styles.emptyStateText}>
+                            Ouça mais músicas para ver suas recomendações aqui!
+                        </Text>
                     )}
                 </View>
             </>
@@ -121,8 +125,12 @@ export default function Home() {
                                         marginBottom: 20,
                                     }}
                                 />
-                            ) : (
+                            ) : likedMusics && likedMusics.length > 0 ? (
                                 <MusicRow music={item} />
+                            ) : (
+                                <Text style={styles.emptyStateText}>
+                                    Curta mais músicas para ver aqui!
+                                </Text>
                             )}
                         </View>
                     )}
@@ -180,5 +188,11 @@ const styles = StyleSheet.create({
         width: 50,
         height: 100,
         marginBottom: 20,
+    },
+
+    emptyStateText: {
+        color: color.light,
+        fontFamily: "Nexa-Regular",
+        textAlign: "center",
     },
 });

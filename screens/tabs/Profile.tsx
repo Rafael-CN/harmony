@@ -23,7 +23,7 @@ export default function Profile() {
     };
 
     useEffect(() => {
-        if (profile) {
+        if (profile && profile.status.topArtists) {
             musicService.getArtists(profile.status.topArtists.slice(0, 3)).then(setTopArtists);
         }
     }, [profile]);
@@ -65,9 +65,15 @@ export default function Profile() {
                     <View style={styles.sectionContainer}>
                         <Text style={styles.sectionTitle}>Gêneros favoritos</Text>
                         <View style={styles.genresContainer}>
-                            {profile?.status.topGenres.slice(0, 2).map((genre, i) => (
-                                <GenreTag key={i} genre={genre} />
-                            ))}
+                            {profile?.status.topGenres && profile?.status.topGenres.length > 0 ? (
+                                profile?.status.topGenres
+                                    .slice(0, 2)
+                                    .map((genre, i) => <GenreTag key={i} genre={genre} />)
+                            ) : (
+                                <Text style={styles.emptyStateText}>
+                                    Ouça mais músicas para ver seus gêneros favoritos aqui!
+                                </Text>
+                            )}
                         </View>
                     </View>
 
