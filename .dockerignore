@@ -10,4 +10,5 @@
 **/Dockerfile
 **/*.md
 **/*.log
+**/*.sln
 **/appsettings.Development.json
