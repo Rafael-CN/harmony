@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatus } from "expo-av";
 import { useMusicApi } from "../api";
 
 interface IAudioContext {
@@ -25,7 +25,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     const [playbackDuration, setPlaybackDuration] = useState(30000);
     const musicApi = useMusicApi();
 
-    const handleStatusUpdate = (status: any) => {
+    const handleStatusUpdate = (status: AVPlaybackStatus) => {
         if (!status.isLoaded) {
             if (status.error) {
                 stopTrack();

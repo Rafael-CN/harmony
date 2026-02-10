@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { color } from "../../theme.json";
@@ -20,7 +20,7 @@ const MusicCard = ({ music }: { music: Music }) => {
         audio.playTrack(music.id);
     };
 
-    const handleLinkPress = (e: any) => {
+    const handleLinkPress = (e: GestureResponderEvent) => {
         e.stopPropagation();
         Linking.openURL(music.linkUrl);
     };

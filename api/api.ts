@@ -11,9 +11,14 @@ const api = axios.create({
 });
 
 let onUnauthorizedCallback: (() => void) | null = null;
+let onNetworkErrorCallback: (() => void) | null = null;
 
 export const setOnUnauthorized = (callback: () => void) => {
     onUnauthorizedCallback = callback;
+};
+
+export const setOnNetworkError = (callback: () => void) => {
+    onNetworkErrorCallback = callback;
 };
 
 api.interceptors.response.use(
@@ -21,6 +26,8 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             onUnauthorizedCallback?.();
+        } else if (!error.response && error.request) {
+            onNetworkErrorCallback?.();
         }
         return Promise.reject(error);
     }

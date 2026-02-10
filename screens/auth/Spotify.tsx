@@ -14,12 +14,9 @@ export default function Spotify() {
             clientId: process.env.EXPO_PUBLIC_SPOTIFY_ID,
             scopes: [
                 "user-library-read",
-                "user-library-modify",
                 "user-read-email",
                 "user-top-read",
                 "playlist-read-private",
-                "playlist-modify-public",
-                "playlist-modify-private",
             ],
             redirectUri: redirectUri,
         },

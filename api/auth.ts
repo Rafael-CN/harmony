@@ -1,9 +1,15 @@
 import api from "./api";
+import { AxiosError } from "axios";
 
 export interface AuthResponse {
     token: string;
     succeeded: boolean;
     errors?: string[];
+}
+
+export interface RegisterResponse {
+    errors?: string[];
+    succeeded: boolean;
 }
 async function login(username: string, password: string): Promise<AuthResponse> {
     try {
@@ -13,16 +19,19 @@ async function login(username: string, password: string): Promise<AuthResponse> 
             token: response.data.token,
             succeeded: response.status === 200,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof AxiosError
+            ? error.response?.data?.message || "Erro ao fazer login"
+            : "Erro ao fazer login";
         return {
             token: "",
             succeeded: false,
-            errors: [error.response?.data?.message || "Erro ao fazer login"],
+            errors: [message],
         };
     }
 }
 
-async function register(username: string, password: string): Promise<any> {
+async function register(username: string, password: string): Promise<RegisterResponse> {
     try {
         const response = await api.post("user/register", { username, password });
 
@@ -30,9 +39,12 @@ async function register(username: string, password: string): Promise<any> {
             errors: response.data.errors,
             succeeded: response.status === 200,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const errors = error instanceof AxiosError
+            ? error.response?.data?.errors || ["Erro ao registrar"]
+            : ["Erro ao registrar"];
         return {
-            errors: error.response?.data?.errors || ["Erro ao registrar"],
+            errors,
             succeeded: false,
         };
     }

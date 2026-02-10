@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet, Animated, StyleProp, ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 
-const SkeletonLoader = ({ style }: { style?: any }) => {
+const SkeletonLoader = ({ style }: { style?: StyleProp<ViewStyle> }) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {

@@ -31,7 +31,7 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
         uri: fileUri,
         name: `profile_${Date.now()}.jpg`,
         type: "image/jpeg",
-    } as any);
+    } as any); // React Native FormData accepts objects with uri/name/type, but DOM types don't support this
 
     try {
         const response = await api.post("profile/me/photo", formData, {

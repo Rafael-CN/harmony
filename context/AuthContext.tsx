@@ -1,15 +1,17 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Alert } from "react-native";
 import { useAuthApi } from "../api";
+import { AuthResponse, RegisterResponse } from "../api/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api, { setAuthToken, setOnUnauthorized } from "../api/api";
+import api, { setAuthToken, setOnUnauthorized, setOnNetworkError } from "../api/api";
 
 interface IAuthContext {
     isLoading: boolean;
     userToken: string | null;
     isLinkedSpotify: boolean;
-    login: (username: string, password: string) => Promise<any>;
+    login: (username: string, password: string) => Promise<AuthResponse>;
     logout: () => void;
-    register: (username: string, password: string) => Promise<any>;
+    register: (username: string, password: string) => Promise<RegisterResponse>;
     linkSpotify: (code: string) => Promise<boolean>;
 }
 
@@ -22,7 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [userToken, setUserToken] = useState<string | null>(null);
     const [isLinkedSpotify, setIsLinkedSpotify] = useState(false);
 
-    const login = async (username: string, password: string) => {
+    const login = useCallback(async (username: string, password: string) => {
         const response = await authApi.login(username, password);
         if (response.succeeded) {
             setAuthToken(response.token);
@@ -35,30 +37,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         return response;
-    };
+    }, [authApi]);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         setUserToken(null);
         setAuthToken(null);
 
         await AsyncStorage.removeItem("userToken");
-    };
+    }, []);
 
-    const register = async (username: string, password: string) => {
+    const register = useCallback(async (username: string, password: string) => {
         return await authApi.register(username, password);
-    };
+    }, [authApi]);
 
-    const linkSpotify = async (code: string) => {
+    const linkSpotify = useCallback(async (code: string) => {
         const response = await authApi.linkSpotify(code);
         if (response) {
             setIsLinkedSpotify(true);
         }
 
         return response;
-    };
+    }, [authApi]);
 
     useEffect(() => {
         setOnUnauthorized(() => logout());
+        setOnNetworkError(() => {
+            Alert.alert("Sem conexao", "Verifique sua conexao com a internet e tente novamente.");
+        });
 
         const bootstrapAsync = async () => {
             let token;
@@ -92,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             register,
             linkSpotify,
         }),
-        [isLoading, userToken, isLinkedSpotify]
+        [isLoading, userToken, isLinkedSpotify, login, logout, register, linkSpotify]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
