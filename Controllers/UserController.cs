@@ -1,17 +1,24 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-using Harmony.Services.Interfaces;
-using Harmony.Controllers.DTOs;
+using Harmony.Controllers.DTOs.User;
 using Harmony.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Harmony.Services.Authentication;
+using Harmony.Services.Spotify;
 
 namespace Harmony.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(UserManager<User> userManager, IJWTService jwtService, ISpotifyService spotifyService) : ControllerBase
+    public class UserController(
+
+        UserManager<User> userManager,
+        IJWTService jwtService,
+        ISpotifyService spotifyService
+
+    ) : ControllerBase
     {
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDTO model)
@@ -69,16 +76,6 @@ namespace Harmony.Controllers
         }
 
         [Authorize]
-        [HttpGet("name")]
-        public IActionResult GetUsername()
-        {
-            var username = User.FindFirstValue(ClaimTypes.Name);
-            if (username == null) return Unauthorized(new { Message = "Usuário não encontrado" });
-
-            return Ok(new { Username = username });
-        }
-
-        [Authorize]
         [HttpPost("spotify/link")]
         public async Task<IActionResult> LinkSpotifyAccount([FromBody] SpotifyLinkDTO model)
         {
@@ -114,7 +111,7 @@ namespace Harmony.Controllers
         }
 
         [Authorize]
-        [HttpPost("spotify/isLinked")]
+        [HttpGet("spotify/isLinked")]
         public async Task<IActionResult> IsSpotifyLinked()
         {
             var username = User.FindFirstValue(ClaimTypes.Name);

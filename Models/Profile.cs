@@ -2,8 +2,9 @@ namespace Harmony.Models
 {
     public class Profile
     {
-        public Profile() {}
-        public Profile(string displayName) { 
+        public Profile() { }
+        public Profile(string displayName)
+        {
             DisplayName = displayName;
         }
 
@@ -11,6 +12,8 @@ namespace Harmony.Models
         public string? Bio { get; set; }
 
         public string? ProfilePictureUrl { get; set; }
+        public string? ProfilePictureId { get; set; }
+
         public string? NowMusicId { get; set; }
     }
 }
