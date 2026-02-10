@@ -51,6 +51,10 @@ export default function ChatMessages() {
     useEffect(() => {
         fetchMessages();
 
+        const keyboardSub = Keyboard.addListener("keyboardDidShow", () => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        });
+
         Animated.parallel([
             Animated.timing(headerFadeAnim, {
                 toValue: 1,
@@ -66,6 +70,7 @@ export default function ChatMessages() {
         ]).start();
 
         return () => {
+            keyboardSub.remove();
             leaveChat(chat.chatId);
         };
     }, [chat.chatId]);
@@ -80,10 +85,6 @@ export default function ChatMessages() {
             }, 100);
         }
     };
-
-    Keyboard.addListener("keyboardDidShow", () => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-    });
 
     const imageSource = chat.otherParticipant.profilePictureUrl
         ? { uri: chat.otherParticipant.profilePictureUrl }

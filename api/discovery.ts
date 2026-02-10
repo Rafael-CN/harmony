@@ -5,17 +5,17 @@ async function getRecommendedUsers(
     page: number = 1,
     pageSize: number = 10
 ): Promise<RecommendedUser[]> {
-    const response = await api.get(`discovery/users?page=${page}&pageSize=${pageSize}`);
+    const response = await api.get("discovery/users", { params: { page, pageSize } });
     return response?.data || [];
 }
 
 async function getRecommendedMusics(limit: number = 5): Promise<Music[]> {
-    const response = await api.get(`discovery/music?limit=${limit}`);
+    const response = await api.get("discovery/music", { params: { limit } });
     return response?.data || [];
 }
 
 async function getRecommendedSeeds(seeds: string[]): Promise<Music[]> {
-    const response = await api.get(`discovery/music/seeds?s=${seeds.join(",")}`);
+    const response = await api.get("discovery/music/seeds", { params: { s: seeds.join(",") } });
     return response?.data || [];
 }
 

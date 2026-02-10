@@ -23,7 +23,11 @@ export default function Login() {
         navigator.navigate("Register" as never);
     };
 
+    const isFormValid = user.name.trim().length > 0 && user.password.trim().length > 0;
+
     const handleSigningIn = async () => {
+        if (!isFormValid) return;
+
         setInvalid(false);
         setSigningIn(true);
 
@@ -63,7 +67,7 @@ export default function Login() {
 
                         {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
 
-                        <HButton onPress={handleSigningIn} disabled={signingIn} text="Entrar" />
+                        <HButton onPress={handleSigningIn} disabled={signingIn || !isFormValid} text="Entrar" />
 
                         <Pressable style={styles.link} onPress={goToRegister}>
                             <Text style={styles.linkText}>Ainda não possui uma conta?</Text>

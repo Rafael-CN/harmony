@@ -2,22 +2,22 @@ import api from "./api";
 import { Artist, Music } from "../types";
 
 async function getLikedSongs(limit: number = 5): Promise<Array<Music>> {
-    const response = await api.get(`music/liked?limit=${limit}`);
+    const response = await api.get("music/liked", { params: { limit } });
     return response?.data;
 }
 
 async function setLikedSongs(songIds: Array<string>): Promise<void> {
-    const response = await api.post(`music/liked`, { songIds });
+    const response = await api.post("music/liked", { songIds });
     return response?.data;
 }
 
 async function getQuerySongs(query: string, offset: number = 0): Promise<Array<Music>> {
-    const response = await api.get(`music/search?query=${query}&offset=${offset}`);
+    const response = await api.get("music/search", { params: { query, offset } });
     return response?.data;
 }
 
 async function getArtists(artistIds: Array<string>): Promise<Array<Artist>> {
-    const response = await api.get(`music/artists?ids=${artistIds.join(",")}`);
+    const response = await api.get("music/artists", { params: { ids: artistIds.join(",") } });
     return response?.data;
 }
 

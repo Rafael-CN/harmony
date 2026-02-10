@@ -19,7 +19,6 @@ export default function Profile() {
     const handleSaveProfile = () => {
         fetchProfile();
         setVisible(false);
-        console.log("Perfil salvo com sucesso!");
     };
 
     useEffect(() => {

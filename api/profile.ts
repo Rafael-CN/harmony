@@ -45,8 +45,7 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
         }
 
         return null;
-    } catch (error) {
-        console.error("Erro ao fazer upload da foto de perfil:", error);
+    } catch {
         return null;
     }
 }

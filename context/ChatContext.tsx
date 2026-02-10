@@ -55,8 +55,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
             connectionRef.current = connection;
 
             connection.on("ReceiveMessage", (newMessage) => {
-                console.log("Nova mensagem recebida via SignalR:", newMessage);
-
                 if (newMessage.chatId === activeChatIdRef.current) {
                     const messageWithIsMe = {
                         ...newMessage,
@@ -64,7 +62,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                     };
 
                     setChatMessages((prevMessages) => [...prevMessages, messageWithIsMe]);
-                    console.log("Mensagem adicionada à lista de mensagens");
                 }
 
                 setChats((prevChats) => {
@@ -82,10 +79,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                 });
             });
 
-            connection
-                .start()
-                .then(() => console.log("SignalR Conectado com sucesso!"))
-                .catch((err) => console.error("Erro na conexão SignalR: ", err));
+            connection.start().catch(() => {});
 
             return () => {
                 connection.stop();
@@ -100,8 +94,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const chats = await chatApi.getMyChats();
             setChats(chats);
-        } catch (error) {
-            console.error("Erro ao buscar chats:", error);
+        } catch {
         } finally {
             setLoadingChats(false);
         }
@@ -120,10 +113,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (connectionRef.current?.state === signalR.HubConnectionState.Connected) {
                 await connectionRef.current.invoke("JoinChat", chatId);
-                console.log(`Entrou no grupo do chat: ${chatId}`);
             }
-        } catch (error) {
-            console.error("Erro ao buscar mensagens:", error);
+        } catch {
         } finally {
             setLoadingMessages(false);
         }
@@ -131,13 +122,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
     const sendMessage = async (chatId: string, message: string) => {
         try {
-            const newMessage = await chatApi.sendMessage(chatId, message);
-            if (!newMessage) {
-                console.error("Erro ao enviar mensagem.");
-                return;
-            }
-        } catch (error) {
-            console.error("Erro ao enviar mensagem:", error);
+            await chatApi.sendMessage(chatId, message);
+        } catch {
         }
     };
 
@@ -147,8 +133,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
                 await connectionRef.current.invoke("LeaveChat", chatId);
                 setChatMessages([]);
                 setActiveChatId(null);
-            } catch (err) {
-                console.error("Erro ao sair do grupo do chat:", err);
+            } catch {
             }
         }
     };

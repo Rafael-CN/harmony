@@ -28,7 +28,6 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     const handleStatusUpdate = (status: any) => {
         if (!status.isLoaded) {
             if (status.error) {
-                console.error(`Error during playback: ${status.error}`);
                 stopTrack();
             }
             return;
@@ -88,8 +87,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
 
             setSound(newSound);
             newSound.setOnPlaybackStatusUpdate(handleStatusUpdate);
-        } catch (error) {
-            console.error("Error playing track:", error);
+        } catch {
             setCurrentTrackId(null);
         } finally {
             setIsLoading(false);

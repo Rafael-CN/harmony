@@ -19,15 +19,28 @@ export default function Register() {
 
     const [signingUp, setSigningUp] = useState(false);
     const [user, setUser] = useState({ username: "", password: "" });
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const isFormValid = user.username.trim().length > 0 && user.password.length >= 6;
 
     const handleSignUp = async () => {
+        setErrorMessage("");
+
+        if (user.username.trim().length === 0) {
+            setErrorMessage("Preencha o nome de usuário");
+            return;
+        }
+        if (user.password.length < 6) {
+            setErrorMessage("A senha deve ter no mínimo 6 caracteres");
+            return;
+        }
+
         setSigningUp(true);
 
         const response = await register(user.username, user.password);
         if (response.succeeded) {
             navigator.navigate("Login" as never);
         } else {
-            console.log(response.errors);
             alert("Houve um erro ao cadastrar o usuário");
         }
 
@@ -64,7 +77,9 @@ export default function Register() {
                             onChangeText={(value) => setUser({ ...user, password: value })}
                         />
 
-                        <HButton onPress={handleSignUp} disabled={signingUp} text="Cadastrar" />
+                        {errorMessage !== "" && <Text style={styles.error}>{errorMessage}</Text>}
+
+                        <HButton onPress={handleSignUp} disabled={signingUp || !isFormValid} text="Cadastrar" />
 
                         <Pressable style={styles.link} onPress={goToLogin}>
                             <Text style={styles.linkText}>Já possui uma conta?</Text>
@@ -140,5 +155,11 @@ const styles = StyleSheet.create({
     linkTextBold: {
         fontFamily: "Nexa-Heavy",
         textDecorationLine: "underline",
+    },
+
+    error: {
+        color: "#E55381",
+        marginTop: 10,
+        fontFamily: "Nexa-ExtraLight",
     },
 });

@@ -21,8 +21,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
             setIsLoading(true);
             const data = await profileApi.getProfile();
             setProfile(data);
-        } catch (error) {
-            console.error("Failed to fetch profile:", error);
+        } catch {
             setProfile(null);
         } finally {
             setIsLoading(false);
