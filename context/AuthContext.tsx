@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useAuthApi } from "../api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api, { setAuthToken } from "../api/api";
+import api, { setAuthToken, setOnUnauthorized } from "../api/api";
 
 interface IAuthContext {
     isLoading: boolean;
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const isLinked = await authApi.isLinkedSpotify();
             setIsLinkedSpotify(isLinked);
 
-            // await AsyncStorage.setItem("userToken", response.token);
+            await AsyncStorage.setItem("userToken", response.token);
         }
 
         return response;
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserToken(null);
         setAuthToken(null);
 
-        // await AsyncStorage.removeItem("userToken");
+        await AsyncStorage.removeItem("userToken");
     };
 
     const register = async (username: string, password: string) => {
@@ -58,6 +58,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
+        setOnUnauthorized(() => logout());
+
         const bootstrapAsync = async () => {
             let token;
             try {

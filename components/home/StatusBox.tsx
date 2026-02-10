@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
-import * as Color from "react-native-color-toolkit";
+import { color } from "../../theme.json";
 
 interface StatusBoxProps {
     title: string;
@@ -10,20 +10,20 @@ interface StatusBoxProps {
     number: number;
 }
 
-const StatusBox = ({ title, icon, color, number }: StatusBoxProps) => {
+const StatusBox = ({ title, icon, color: statusColor, number }: StatusBoxProps) => {
     const dynamicStyles = StyleSheet.create({
         statusContainer: {
-            backgroundColor: Color.darken(color, 0.8),
-            borderColor: Color.darken(color, 0.7),
+            backgroundColor: `${statusColor}30`,
+            borderColor: `${statusColor}80`,
         },
         statusTitle: {
-            color: Color.desaturate(Color.brighten(color, 2), 0.85),
+            color: `${statusColor}`,
         },
         statusIcon: {
-            color: color,
+            color: statusColor,
         },
         statusNumber: {
-            color: Color.desaturate(Color.brighten(color, 0.5), 0.3),
+            color: `${statusColor}`,
         },
     });
 

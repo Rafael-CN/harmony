@@ -31,7 +31,7 @@ const FindUserCard = ({ user }: { user: RecommendedUser }) => {
                     {user.displayName}
                 </Text>
                 <Text style={styles.profileBio} numberOfLines={1}>
-                    {user.bio || "Sem biografia"}
+                    {user.bio || "Sem biografia."}
                 </Text>
 
                 <View style={styles.profileInfoFooter}>

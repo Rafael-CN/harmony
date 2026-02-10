@@ -22,7 +22,6 @@ export default function Spotify() {
                 "playlist-modify-private",
             ],
             redirectUri: redirectUri,
-            usePKCE: false,
         },
         {
             authorizationEndpoint: "https://accounts.spotify.com/authorize",

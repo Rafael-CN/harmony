@@ -3,40 +3,66 @@ import api from "./api";
 export interface AuthResponse {
     token: string;
     succeeded: boolean;
+    errors?: string[];
 }
 async function login(username: string, password: string): Promise<AuthResponse> {
-    const response = await api.post("user/login", { username, password });
+    try {
+        const response = await api.post("user/login", { username, password });
 
-    return {
-        token: response?.data.token,
-        succeeded: response?.status == 200,
-    };
+        return {
+            token: response.data.token,
+            succeeded: response.status === 200,
+        };
+    } catch (error: any) {
+        return {
+            token: "",
+            succeeded: false,
+            errors: [error.response?.data?.message || "Erro ao fazer login"],
+        };
+    }
 }
 
 async function register(username: string, password: string): Promise<any> {
-    const response = await api.post("user/register", { username, password });
+    try {
+        const response = await api.post("user/register", { username, password });
 
-    return {
-        errors: response?.data.errors,
-        succeeded: response?.status == 200,
-    };
+        return {
+            errors: response.data.errors,
+            succeeded: response.status === 200,
+        };
+    } catch (error: any) {
+        return {
+            errors: error.response?.data?.errors || ["Erro ao registrar"],
+            succeeded: false,
+        };
+    }
 }
 
 async function isLoggedIn(): Promise<boolean> {
-    const response = await api.get("user/logged-in");
-    return response?.data.isLoggedIn;
+    try {
+        const response = await api.get("user/logged-in");
+        return response.data.isLoggedIn;
+    } catch {
+        return false;
+    }
 }
 
 async function isLinkedSpotify(): Promise<boolean> {
-    const response = await api.get("user/spotify/isLinked");
-    console.log(response);
-
-    return response?.data.isLinked;
+    try {
+        const response = await api.get("user/spotify/isLinked");
+        return response.data.isLinked;
+    } catch {
+        return false;
+    }
 }
 
 async function linkSpotify(authCode: string): Promise<boolean> {
-    const response = await api.post("user/spotify/link", { authCode });
-    return response?.status === 200;
+    try {
+        const response = await api.post("user/spotify/link", { authCode });
+        return response.status === 200;
+    } catch {
+        return false;
+    }
 }
 
 export function useAuthApi() {

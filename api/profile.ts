@@ -3,17 +3,25 @@ import { ProfileData } from "../types";
 
 async function getProfile(): Promise<ProfileData> {
     const response = await api.get("profile/me");
-    return response?.data;
+    return response.data;
 }
 
 async function updateProfile(displayName: string, bio: string): Promise<boolean> {
-    const response = await api.put("profile/me", { displayName, bio });
-    return response?.status === 200;
+    try {
+        const response = await api.put("profile/me", { displayName, bio });
+        return response.status === 200;
+    } catch {
+        return false;
+    }
 }
 
 async function updateProfileNowMusic(nowMusicId: string): Promise<boolean> {
-    const response = await api.put("profile/me", { nowMusicId });
-    return response?.status === 200;
+    try {
+        const response = await api.put("profile/me", { nowMusicId });
+        return response.status === 200;
+    } catch {
+        return false;
+    }
 }
 
 async function updateProfilePicture(fileUri: string): Promise<string | null> {
@@ -44,12 +52,19 @@ async function updateProfilePicture(fileUri: string): Promise<string | null> {
 }
 
 async function followUser(username: string): Promise<{ isMatch: boolean; succeeded: boolean }> {
-    const response = await api.post(`profile/follow/${username}`, {});
+    try {
+        const response = await api.post(`profile/follow/${username}`, {});
 
-    return {
-        isMatch: response?.data.isMatch,
-        succeeded: response?.status == 200,
-    };
+        return {
+            isMatch: response.data.isMatch,
+            succeeded: response.status === 200,
+        };
+    } catch {
+        return {
+            isMatch: false,
+            succeeded: false,
+        };
+    }
 }
 
 export function useProfileApi() {

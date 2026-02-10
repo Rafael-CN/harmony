@@ -1,8 +1,5 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
-import * as Color from "react-native-color-toolkit";
 
 interface TonalPalette {
     dark: string;

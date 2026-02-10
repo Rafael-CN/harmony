@@ -48,7 +48,12 @@ export default function Home() {
                         color="#D6677F"
                         number={profile?.status.likedCount || 0}
                     />
-                    <StatusBox title="Amigos" icon="people-outline" color="#4F518C" number={0} />
+                    <StatusBox
+                        title="Seguidores"
+                        icon="people-outline"
+                        color="#4F518C"
+                        number={profile?.followersCount || 0}
+                    />
                 </View>
 
                 <View style={styles.sectionHeader}>
