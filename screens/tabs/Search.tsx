@@ -22,6 +22,8 @@ export default function Search() {
 
     const [querySongs, setQuerySongs] = useState<Array<Music> | null>(null);
     const [search, setSearch] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (!search) setQuerySongs(null);
@@ -30,9 +32,15 @@ export default function Search() {
     const handleSearch = () => {
         if (!search) return;
 
-        musicApi.getQuerySongs(search).then((songs) => {
-            setQuerySongs(songs);
-        });
+        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+        searchTimerRef.current = setTimeout(() => {
+            setIsSearching(true);
+            musicApi.getQuerySongs(search).then((songs) => {
+                setQuerySongs(songs);
+                setIsSearching(false);
+            });
+        }, 400);
     };
 
     const handleScroll = (event: any) => {

@@ -26,8 +26,11 @@ export default function FindProfile() {
     const [trackId, setTrackId] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
+    const isFetchingRef = useRef(false);
 
     const fetchUsers = async () => {
+        if (isFetchingRef.current) return;
+        isFetchingRef.current = true;
         setIsLoading(true);
 
         const recommendedUsers = await discoveryApi.getRecommendedUsers(userPage, 9);
@@ -37,6 +40,7 @@ export default function FindProfile() {
 
         if (recommendedUsers.length < 9) setHasMoreUsers(false);
         setIsLoading(false);
+        isFetchingRef.current = false;
     };
 
     useEffect(() => {

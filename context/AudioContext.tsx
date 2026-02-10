@@ -118,6 +118,9 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
             shouldDuckAndroid: true,
             playThroughEarpieceAndroid: false,
         });
+    }, []);
+
+    useEffect(() => {
         return () => {
             sound?.unloadAsync();
         };
