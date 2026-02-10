@@ -6,7 +6,7 @@ import { color } from "../../theme.json";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "../../types";
 import { useMusicApi } from "../../api/music";
-import { MusicRow } from "../../components/common";
+import { MusicRow, EmptyState } from "../../components/common";
 import { useUserApi } from "../../api";
 
 export default function Search() {
@@ -23,10 +23,14 @@ export default function Search() {
     const [querySongs, setQuerySongs] = useState<Array<Music> | null>(null);
     const [search, setSearch] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState(false);
     const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
-        if (!search) setQuerySongs(null);
+        if (!search) {
+            setQuerySongs(null);
+            setSearchError(false);
+        }
     }, [search]);
 
     const handleSearch = () => {
@@ -34,10 +38,14 @@ export default function Search() {
 
         if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
 
+        setSearchError(false);
         searchTimerRef.current = setTimeout(() => {
             setIsSearching(true);
             musicApi.getQuerySongs(search).then((songs) => {
                 setQuerySongs(songs);
+                setIsSearching(false);
+            }).catch(() => {
+                setSearchError(true);
                 setIsSearching(false);
             });
         }, 400);
@@ -75,7 +83,21 @@ export default function Search() {
                 </View>
 
                 <View style={styles.searchResultsContainer}>
-                    {querySongs && (
+                    {searchError && !isSearching && (
+                        <EmptyState
+                            icon="alert-circle-outline"
+                            title="Erro ao buscar musicas"
+                            subtitle="Tente novamente"
+                        />
+                    )}
+                    {!searchError && querySongs !== null && querySongs.length === 0 && !isSearching && (
+                        <EmptyState
+                            icon="search-outline"
+                            title="Nenhuma musica encontrada"
+                            subtitle="Tente outro termo"
+                        />
+                    )}
+                    {querySongs && querySongs.length > 0 && (
                         <ScrollView style={styles.searchResults} onScroll={handleScroll}>
                             {querySongs.map((music, i) => (
                                 <MusicRow

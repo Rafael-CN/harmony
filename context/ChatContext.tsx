@@ -12,7 +12,7 @@ interface IChatContext {
     loadingMessages: boolean;
     getMyChats: () => Promise<void>;
     getChatMessages: (chatId: string) => Promise<void>;
-    sendMessage: (chatId: string, message: string) => Promise<void>;
+    sendMessage: (chatId: string, message: string) => Promise<boolean>;
     leaveChat: (chatId: string) => Promise<void>;
 }
 
@@ -120,10 +120,12 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const sendMessage = async (chatId: string, message: string) => {
+    const sendMessage = async (chatId: string, message: string): Promise<boolean> => {
         try {
             await chatApi.sendMessage(chatId, message);
+            return true;
         } catch {
+            return false;
         }
     };
 

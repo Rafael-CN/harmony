@@ -7,6 +7,7 @@ import { Music } from "../../types";
 import { useDiscoveryApi } from "../../api";
 import SwipeControls, { SwipeControlsRef } from "../../components/find/SwipeControls";
 import FindMusicCard from "../../components/find/FindMusicCard";
+import { EmptyState } from "../../components/common";
 
 const { width } = Dimensions.get("window");
 
@@ -23,15 +24,22 @@ export default function FindMusic() {
     const [trackId, setTrackId] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
 
     const fetchMusic = async () => {
         setIsLoading(true);
+        setFetchError(false);
 
-        const recommendedMusics = await discoveryApi.getRecommendedMusics(9);
-        setMusicQueue((prev) => [...prev, ...recommendedMusics]);
+        try {
+            const recommendedMusics = await discoveryApi.getRecommendedMusics(9);
+            setMusicQueue((prev) => [...prev, ...recommendedMusics]);
 
-        if (recommendedMusics.length < 9) setHasMoreMusics(false);
-        setIsLoading(false);
+            if (recommendedMusics.length < 9) setHasMoreMusics(false);
+        } catch {
+            setFetchError(true);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -107,6 +115,21 @@ export default function FindMusic() {
         <LinearGradient colors={["#000000", `${color.extraDark}99`]} style={style.container}>
             <View style={style.cardContainer}>
                 {isLoading && <ActivityIndicator size="large" color={color.light} />}
+
+                {fetchError && (
+                    <EmptyState
+                        icon="alert-circle-outline"
+                        title="Erro ao carregar musicas"
+                    />
+                )}
+
+                {!fetchError && !isLoading && musicQueue.length === 0 && (
+                    <EmptyState
+                        icon="musical-notes-outline"
+                        title="Nenhuma musica disponivel"
+                        subtitle="Volte mais tarde"
+                    />
+                )}
 
                 {renderedQueue.map((music, index) => {
                     const isTopCard = index === 0;

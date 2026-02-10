@@ -7,6 +7,7 @@ import { useDiscoveryApi, useUserApi } from "../../api";
 import SwipeControls, { SwipeControlsRef } from "../../components/find/SwipeControls";
 import { RecommendedUser } from "../../types";
 import FindUserCard from "../../components/find/FindUserCard";
+import { EmptyState } from "../../components/common";
 
 const { width } = Dimensions.get("window");
 
@@ -26,21 +27,28 @@ export default function FindProfile() {
     const [trackId, setTrackId] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const isFetchingRef = useRef(false);
 
     const fetchUsers = async () => {
         if (isFetchingRef.current) return;
         isFetchingRef.current = true;
         setIsLoading(true);
+        setFetchError(false);
 
-        const recommendedUsers = await discoveryApi.getRecommendedUsers(userPage, 9);
+        try {
+            const recommendedUsers = await discoveryApi.getRecommendedUsers(userPage, 9);
 
-        setUserQueue((prev) => [...prev, ...recommendedUsers]);
-        setUserPage((prev) => prev + 1);
+            setUserQueue((prev) => [...prev, ...recommendedUsers]);
+            setUserPage((prev) => prev + 1);
 
-        if (recommendedUsers.length < 9) setHasMoreUsers(false);
-        setIsLoading(false);
-        isFetchingRef.current = false;
+            if (recommendedUsers.length < 9) setHasMoreUsers(false);
+        } catch {
+            setFetchError(true);
+        } finally {
+            setIsLoading(false);
+            isFetchingRef.current = false;
+        }
     };
 
     useEffect(() => {
@@ -168,17 +176,19 @@ export default function FindProfile() {
                     );
                 })}
 
-                {!hasMoreUsers && userQueue.length === 0 && (
-                    <Text
-                        style={{
-                            textAlign: "center",
-                            color: color.extraLight,
-                            fontFamily: "Nexa-Regular",
-                            fontSize: 18,
-                        }}
-                    >
-                        Não há mais usuários para serem encontrados no momento.
-                    </Text>
+                {fetchError && (
+                    <EmptyState
+                        icon="alert-circle-outline"
+                        title="Erro ao carregar usuarios"
+                    />
+                )}
+
+                {!fetchError && !hasMoreUsers && userQueue.length === 0 && (
+                    <EmptyState
+                        icon="people-outline"
+                        title="Ninguem novo por aqui"
+                        subtitle="Volte mais tarde para descobrir novas pessoas"
+                    />
                 )}
 
                 <SwipeControls

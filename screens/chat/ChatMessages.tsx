@@ -20,6 +20,7 @@ import { useRef, useEffect, useState } from "react";
 import { MessageBubble } from "../../components/chat";
 import { Chat, ChatMessage } from "../../types";
 import { useChat } from "../../context/ChatContext";
+import { EmptyState } from "../../components/common";
 
 export default function ChatMessages() {
     const navigation = useNavigation();
@@ -76,13 +77,14 @@ export default function ChatMessages() {
     }, [chat.chatId]);
 
     const handleSendMessage = async () => {
-        if (messageText.trim()) {
-            await sendMessage(chat.chatId, messageText);
-            setMessageText("");
-
-            setTimeout(() => {
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-            }, 100);
+        if (!messageText.trim()) return;
+        const tempText = messageText;
+        setMessageText("");
+        const result = await sendMessage(chat.chatId, tempText);
+        if (!result) {
+            setMessageText(tempText);
+        } else {
+            setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
         }
     };
 
@@ -104,6 +106,7 @@ export default function ChatMessages() {
                             <TouchableOpacity
                                 style={styles.backButton}
                                 onPress={() => navigation.goBack()}
+                                accessibilityLabel="Voltar"
                             >
                                 <Ionicons name="chevron-back" style={styles.backIcon} />
                             </TouchableOpacity>
@@ -133,7 +136,7 @@ export default function ChatMessages() {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                 >
                     {activeChatMessages.length <= 0 && (
-                        <Text style={styles.noMessages}>Nenhuma mensagem</Text>
+                        <EmptyState icon="chatbubble-outline" title="Nenhuma mensagem" />
                     )}
                     <ScrollView
                         ref={scrollViewRef}
@@ -174,6 +177,7 @@ export default function ChatMessages() {
                                 ]}
                                 onPress={handleSendMessage}
                                 disabled={!messageText.trim()}
+                                accessibilityLabel="Enviar mensagem"
                             >
                                 <Ionicons
                                     name="send"
@@ -224,7 +228,7 @@ const styles = StyleSheet.create({
     },
 
     backButton: {
-        padding: 8,
+        padding: 12,
         marginRight: 10,
     },
 

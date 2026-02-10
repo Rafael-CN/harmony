@@ -1,17 +1,26 @@
-import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 import { color } from "../../theme.json";
 
 interface HButtonProps {
     text: string;
+    loading?: boolean;
 }
 
-const HButton = ({ ...props }: TouchableOpacityProps & HButtonProps) => {
+const HButton = ({ loading, ...props }: TouchableOpacityProps & HButtonProps) => {
     return (
         <TouchableOpacity
             {...props}
-            style={[styles.button, props.disabled && styles.buttonDisabled, props.style]}
+            disabled={props.disabled || loading}
+            style={[styles.button, (props.disabled || loading) && styles.buttonDisabled, props.style]}
+            accessibilityRole="button"
+            accessibilityLabel={props.text}
+            accessibilityState={{ disabled: props.disabled || loading }}
         >
-            <Text style={styles.buttonText}>{props.text}</Text>
+            {loading ? (
+                <ActivityIndicator size="small" color={color.light} />
+            ) : (
+                <Text style={styles.buttonText}>{props.text}</Text>
+            )}
         </TouchableOpacity>
     );
 };

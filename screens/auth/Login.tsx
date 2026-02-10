@@ -65,11 +65,11 @@ export default function Login() {
                             secureTextEntry
                         />
 
-                        {isInvalid && <Text style={styles.error}>Usuário ou senha inválidos</Text>}
+                        {isInvalid && <Text style={styles.error} accessibilityLiveRegion="polite">Usuário ou senha inválidos</Text>}
 
-                        <HButton onPress={handleSigningIn} disabled={signingIn || !isFormValid} text="Entrar" />
+                        <HButton onPress={handleSigningIn} loading={signingIn} disabled={!isFormValid} text="Entrar" />
 
-                        <Pressable style={styles.link} onPress={goToRegister}>
+                        <Pressable style={styles.link} onPress={goToRegister} accessibilityRole="link">
                             <Text style={styles.linkText}>Ainda não possui uma conta?</Text>
                             <Text style={[styles.linkText, styles.linkTextBold]}>Cadastre-se</Text>
                         </Pressable>
@@ -93,13 +93,13 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        color: "#fff",
+        color: color.white,
         fontSize: 50,
         fontFamily: "Nexa-Heavy",
     },
 
     legend: {
-        color: "#fff",
+        color: color.white,
         textAlign: "center",
         fontSize: 18,
         fontFamily: "Nexa-ExtraLight",
@@ -110,6 +110,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        minHeight: 44,
+        paddingVertical: 12,
     },
 
     linkText: {
@@ -125,7 +127,7 @@ const styles = StyleSheet.create({
     },
 
     error: {
-        color: "#E55381",
+        color: color.error,
         marginTop: 10,
         fontFamily: "Nexa-ExtraLight",
     },

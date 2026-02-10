@@ -6,6 +6,7 @@ const HTextInput = ({ ...props }: TextInputProps) => {
     return (
         <TextInput
             placeholderTextColor={color.light}
+            accessibilityLabel={props.placeholder}
             {...props}
             style={[styles.input, props.style]}
         />

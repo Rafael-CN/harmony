@@ -37,6 +37,7 @@ const MusicRow = ({ music, linkButtonIcon, linkButtonPress }: MusicRowProps) => 
             onPress={handlePress}
             activeOpacity={0.7}
             disabled={isThisTrackLoading}
+            accessibilityLabel={`Tocar ${music.name} de ${music.artist}`}
         >
             <View style={styles.songInfoContainer}>
                 <View style={styles.songCoverContainer}>
@@ -57,7 +58,7 @@ const MusicRow = ({ music, linkButtonIcon, linkButtonPress }: MusicRowProps) => 
                         ]}
                     >
                         {isThisTrackLoading ? (
-                            <ActivityIndicator size="small" color={"#fff"} />
+                            <ActivityIndicator size="small" color={color.white} />
                         ) : isThisTrackPlaying ? (
                             <Image
                                 source={require("../../assets/equalizer.gif")}
@@ -88,6 +89,8 @@ const MusicRow = ({ music, linkButtonIcon, linkButtonPress }: MusicRowProps) => 
                 style={styles.songLink}
                 onPress={linkButtonPress || handleLinkPress}
                 disabled={isThisTrackLoading}
+                hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                accessibilityLabel="Abrir no Spotify"
             >
                 <Ionicons name={linkButtonIcon || "open-outline"} style={styles.songLinkIcon} />
             </TouchableOpacity>

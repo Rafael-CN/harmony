@@ -5,6 +5,7 @@ import { ScrollView, StyleSheet, Text, Animated } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import { ChatItem } from "../../components/chat";
 import { useChat } from "../../context/ChatContext";
+import { EmptyState } from "../../components/common";
 
 export default function ChatList() {
     const { chats, getMyChats, loadingChats } = useChat();
@@ -43,15 +44,23 @@ export default function ChatList() {
                     </LinearGradient>
                 </Animated.View>
 
-                <ScrollView
-                    style={styles.scrollView}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
-                >
-                    {chats.map((chat, index) => (
-                        <ChatItem key={chat.chatId} chat={chat} index={index} />
-                    ))}
-                </ScrollView>
+                {chats.length === 0 && !loadingChats ? (
+                    <EmptyState
+                        icon="chatbox-outline"
+                        title="Nenhuma conversa ainda"
+                        subtitle="Descubra pessoas na aba Discover"
+                    />
+                ) : (
+                    <ScrollView
+                        style={styles.scrollView}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.scrollContent}
+                    >
+                        {chats.map((chat, index) => (
+                            <ChatItem key={chat.chatId} chat={chat} index={index} />
+                        ))}
+                    </ScrollView>
+                )}
             </SafeAreaView>
         </LinearGradient>
     );

@@ -1,9 +1,10 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { makeRedirectUri, ResponseType, useAuthRequest } from "expo-auth-session";
 import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../context/AuthContext";
+import { color } from "../../theme.json";
 
 export default function Spotify() {
     const redirectUri = makeRedirectUri();
@@ -54,15 +55,21 @@ export default function Spotify() {
                 </View>
 
                 <TouchableOpacity
-                    style={styles.spotifyButton}
+                    style={[styles.spotifyButton, disabled && { opacity: 0.5 }]}
                     disabled={!request || disabled}
                     onPress={() => promptAsync()}
                 >
-                    <Image
-                        source={require("../../assets/icons/spotify.png")}
-                        style={styles.spotifyImage}
-                    />
-                    <Text style={styles.spotifyText}>Entrar com Spotify</Text>
+                    {disabled ? (
+                        <ActivityIndicator size="small" color={color.white} />
+                    ) : (
+                        <>
+                            <Image
+                                source={require("../../assets/icons/spotify.png")}
+                                style={styles.spotifyImage}
+                            />
+                            <Text style={styles.spotifyText}>Entrar com Spotify</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
             </SafeAreaView>
         </LinearGradient>
@@ -83,13 +90,13 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        color: "#fff",
+        color: color.white,
         fontSize: 50,
         fontFamily: "Nexa-Heavy",
     },
 
     legend: {
-        color: "#fff",
+        color: color.white,
         textAlign: "center",
         fontSize: 18,
         fontFamily: "Nexa-ExtraLight",
@@ -99,7 +106,7 @@ const styles = StyleSheet.create({
     spotifyButton: {
         width: "75%",
         height: "8%",
-        backgroundColor: "#1DB954",
+        backgroundColor: color.spotify,
         padding: 15,
         borderRadius: 15,
         marginBottom: 15,
@@ -109,7 +116,7 @@ const styles = StyleSheet.create({
     },
 
     spotifyText: {
-        color: "white",
+        color: color.white,
         fontSize: 18,
         fontFamily: "Nexa-Heavy",
     },

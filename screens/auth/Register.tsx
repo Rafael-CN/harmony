@@ -77,11 +77,11 @@ export default function Register() {
                             onChangeText={(value) => setUser({ ...user, password: value })}
                         />
 
-                        {errorMessage !== "" && <Text style={styles.error}>{errorMessage}</Text>}
+                        {errorMessage !== "" && <Text style={styles.error} accessibilityLiveRegion="polite">{errorMessage}</Text>}
 
-                        <HButton onPress={handleSignUp} disabled={signingUp || !isFormValid} text="Cadastrar" />
+                        <HButton onPress={handleSignUp} loading={signingUp} disabled={!isFormValid} text="Cadastrar" />
 
-                        <Pressable style={styles.link} onPress={goToLogin}>
+                        <Pressable style={styles.link} onPress={goToLogin} accessibilityRole="link">
                             <Text style={styles.linkText}>Já possui uma conta?</Text>
                             <Text style={[styles.linkText, styles.linkTextBold]}>Faça login</Text>
                         </Pressable>
@@ -106,13 +106,13 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        color: "#fff",
+        color: color.white,
         fontSize: 50,
         fontFamily: "Nexa-Heavy",
     },
 
     legend: {
-        color: "#fff",
+        color: color.white,
         textAlign: "center",
         fontSize: 18,
         fontFamily: "Nexa-ExtraLight",
@@ -143,6 +143,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        minHeight: 44,
+        paddingVertical: 12,
     },
 
     linkText: {
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
     },
 
     error: {
-        color: "#E55381",
+        color: color.error,
         marginTop: 10,
         fontFamily: "Nexa-ExtraLight",
     },
