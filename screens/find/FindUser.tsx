@@ -8,6 +8,7 @@ import SwipeControls, { SwipeControlsRef } from "../../components/find/SwipeCont
 import { RecommendedUser } from "../../types";
 import FindUserCard from "../../components/find/FindUserCard";
 import { EmptyState } from "../../components/common";
+import MatchModal from "../../components/find/MatchModal";
 
 const { width } = Dimensions.get("window");
 
@@ -29,6 +30,9 @@ export default function FindProfile() {
     const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const isFetchingRef = useRef(false);
+
+    const [matchModalVisible, setMatchModalVisible] = useState(false);
+    const [matchUsername, setMatchUsername] = useState("");
 
     const fetchUsers = async () => {
         if (isFetchingRef.current) return;
@@ -121,8 +125,8 @@ export default function FindProfile() {
     const handleFollow = async (username: string) => {
         const response = await userApi.followUser(username);
         if (response.succeeded && response.isMatch) {
-            // TODO: Animação de match
-            alert("Match!");
+            setMatchUsername(username);
+            setMatchModalVisible(true);
         }
     };
 
@@ -136,6 +140,11 @@ export default function FindProfile() {
 
     return (
         <LinearGradient colors={["#000000", `${color.extraDark}99`]} style={styles.container}>
+            <MatchModal
+                visible={matchModalVisible}
+                onClose={() => setMatchModalVisible(false)}
+                username={matchUsername}
+            />
             <View style={styles.cardContainer}>
                 {isLoading && <ActivityIndicator size="large" color={color.light} />}
 

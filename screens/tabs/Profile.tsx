@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { BlurView } from "expo-blur";
 import { color } from "../../theme.json";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
@@ -7,14 +8,19 @@ import { ArtistListItem, GenreTag, ProfileEditModal, ProfileInfo } from "../../c
 import { Artist } from "../../types";
 import { useMusicApi } from "../../api";
 import { useProfile } from "../../context/ProfileContext";
+import { useAuth } from "../../context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import { HButton } from "../../components/common";
 
 export default function Profile() {
     const musicService = useMusicApi();
+    const { logout } = useAuth();
 
     const { profile, fetchProfile } = useProfile();
     const [visible, setVisible] = useState(false);
 
     const [topArtists, setTopArtists] = useState<Array<Artist>>([]);
+    const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
     const handleSaveProfile = () => {
         fetchProfile();
@@ -91,8 +97,49 @@ export default function Profile() {
                             )}
                         </View>
                     </View>
+
+                    <TouchableOpacity style={styles.logoutButton} onPress={() => setLogoutModalVisible(true)}>
+                        <Ionicons name="log-out-outline" size={20} color={color.error} />
+                        <Text style={styles.logoutText}>Sair da conta</Text>
+                    </TouchableOpacity>
                 </SafeAreaView>
             </ScrollView>
+
+            <Modal
+                transparent
+                visible={logoutModalVisible}
+                animationType="fade"
+                onRequestClose={() => setLogoutModalVisible(false)}
+            >
+                <BlurView
+                    intensity={5}
+                    tint="dark"
+                    style={styles.logoutModalBlur}
+                    experimentalBlurMethod="dimezisBlurView"
+                >
+                    <View style={styles.logoutModal}>
+                        <Ionicons name="log-out-outline" size={40} color={color.error} />
+                        <Text style={styles.logoutModalTitle}>Sair da conta</Text>
+                        <Text style={styles.logoutModalSubtitle}>
+                            Deseja realmente sair da sua conta?
+                        </Text>
+                        <View style={styles.logoutModalButtons}>
+                            <TouchableOpacity
+                                style={styles.logoutModalCancel}
+                                onPress={() => setLogoutModalVisible(false)}
+                            >
+                                <Text style={styles.logoutModalCancelText}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.logoutModalConfirm}
+                                onPress={logout}
+                            >
+                                <Text style={styles.logoutModalConfirmText}>Sair</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </BlurView>
+            </Modal>
         </LinearGradient>
     );
 }
@@ -164,5 +211,90 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textAlign: "center",
         opacity: 0.7,
+    },
+
+    logoutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        padding: 15,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: color.dark,
+        marginTop: 30,
+        marginBottom: 40,
+    },
+
+    logoutText: {
+        color: color.error,
+        fontFamily: "Nexa-Bold",
+        fontSize: 16,
+    },
+
+    logoutModalBlur: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    logoutModal: {
+        width: "85%",
+        backgroundColor: color.extraDark,
+        borderRadius: 20,
+        padding: 30,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: color.dark,
+    },
+
+    logoutModalTitle: {
+        color: color.extraLight,
+        fontSize: 22,
+        fontFamily: "Nexa-Heavy",
+        marginTop: 15,
+    },
+
+    logoutModalSubtitle: {
+        color: color.light,
+        fontSize: 15,
+        fontFamily: "Nexa-Regular",
+        marginTop: 8,
+        textAlign: "center",
+    },
+
+    logoutModalButtons: {
+        flexDirection: "row",
+        gap: 12,
+        marginTop: 25,
+        width: "100%",
+    },
+
+    logoutModalCancel: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: color.dark,
+        alignItems: "center",
+    },
+
+    logoutModalCancelText: {
+        color: color.light,
+        fontFamily: "Nexa-Bold",
+        fontSize: 16,
+    },
+
+    logoutModalConfirm: {
+        flex: 1,
+        padding: 14,
+        borderRadius: 12,
+        backgroundColor: color.error,
+        alignItems: "center",
+    },
+
+    logoutModalConfirmText: {
+        color: color.white,
+        fontFamily: "Nexa-Bold",
+        fontSize: 16,
     },
 });

@@ -41,7 +41,7 @@ export default function Register() {
         if (response.succeeded) {
             navigator.navigate("Login" as never);
         } else {
-            alert("Houve um erro ao cadastrar o usuário");
+            setErrorMessage("Houve um erro ao cadastrar o usuário");
         }
 
         setSigningUp(false);

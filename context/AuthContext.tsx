@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Alert } from "react-native";
 import { useAuthApi } from "../api";
 import { AuthResponse, RegisterResponse } from "../api/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api, { setAuthToken, setOnUnauthorized, setOnNetworkError } from "../api/api";
+import Toast from "../components/common/Toast";
 
 interface IAuthContext {
     isLoading: boolean;
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [userToken, setUserToken] = useState<string | null>(null);
     const [isLinkedSpotify, setIsLinkedSpotify] = useState(false);
+    const [networkError, setNetworkError] = useState(false);
 
     const login = useCallback(async (username: string, password: string) => {
         const response = await authApi.login(username, password);
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         setOnUnauthorized(() => logout());
         setOnNetworkError(() => {
-            Alert.alert("Sem conexao", "Verifique sua conexao com a internet e tente novamente.");
+            setNetworkError(true);
         });
 
         const bootstrapAsync = async () => {
@@ -100,7 +101,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         [isLoading, userToken, isLinkedSpotify, login, logout, register, linkSpotify]
     );
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            <Toast
+                type="error"
+                message="Sem conexão. Verifique sua internet e tente novamente."
+                visible={networkError}
+                onHide={() => setNetworkError(false)}
+            />
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
 export const useAuth = () => {

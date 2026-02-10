@@ -1,4 +1,4 @@
-import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,7 +6,7 @@ import { color } from "../../theme.json";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "../../types";
 import { useMusicApi } from "../../api/music";
-import { MusicRow, EmptyState } from "../../components/common";
+import { MusicRow, EmptyState, Toast } from "../../components/common";
 import { useUserApi } from "../../api";
 
 export default function Search() {
@@ -15,7 +15,7 @@ export default function Search() {
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus();
-    });
+    }, []);
 
     const musicApi = useMusicApi();
     const userApi = useUserApi();
@@ -25,6 +25,7 @@ export default function Search() {
     const [isSearching, setIsSearching] = useState(false);
     const [searchError, setSearchError] = useState(false);
     const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [toastVisible, setToastVisible] = useState(false);
 
     useEffect(() => {
         if (!search) {
@@ -63,15 +64,25 @@ export default function Search() {
     const handleSetNowMusic = async (musicId: string) => {
         const response = await userApi.updateProfileNowMusic(musicId);
         if (response) {
-            alert("Música atualizada com sucesso!");
+            setToastVisible(true);
         }
     };
 
     return (
         <LinearGradient colors={["#000000", color.extraDark]} style={{ flex: 1 }}>
+            <Toast
+                type="success"
+                message="Música atualizada!"
+                visible={toastVisible}
+                onHide={() => setToastVisible(false)}
+            />
             <SafeAreaView style={styles.container}>
                 <View style={styles.searchSection}>
-                    <Ionicons name="search-outline" size={24} color={textColor}></Ionicons>
+                    {isSearching ? (
+                        <ActivityIndicator size="small" color={textColor} />
+                    ) : (
+                        <Ionicons name="search-outline" size={24} color={textColor} />
+                    )}
                     <TextInput
                         ref={inputRef}
                         style={styles.search}

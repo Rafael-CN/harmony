@@ -5,10 +5,8 @@ import { Image } from "expo-image";
 import { color } from "../../theme.json";
 import { Ionicons } from "@expo/vector-icons";
 import { ProfileData } from "../../types";
-import { useAuth } from "../../context/AuthContext";
 
 const HomeHeader = ({ profile }: { profile: ProfileData | null }) => {
-    const { logout } = useAuth();
     const navigator = useNavigation();
 
     const imageSource = profile?.profilePictureUrl
@@ -36,9 +34,6 @@ const HomeHeader = ({ profile }: { profile: ProfileData | null }) => {
                     onPress={() => navigator.navigate("Search" as never)}
                 >
                     <Ionicons name="search-outline" style={styles.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton} onPress={logout}>
-                    <Ionicons name="log-out-outline" style={styles.icon} />
                 </TouchableOpacity>
             </View>
         </LinearGradient>

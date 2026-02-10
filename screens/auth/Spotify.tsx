@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../context/AuthContext";
 import { color } from "../../theme.json";
+import { Toast } from "../../components/common";
 
 export default function Spotify() {
     const redirectUri = makeRedirectUri();
@@ -12,6 +13,7 @@ export default function Spotify() {
     const [request, response, promptAsync] = useAuthRequest(
         {
             responseType: ResponseType.Code,
+            usePKCE: false,
             clientId: process.env.EXPO_PUBLIC_SPOTIFY_ID,
             scopes: [
                 "user-library-read",
@@ -23,10 +25,12 @@ export default function Spotify() {
         },
         {
             authorizationEndpoint: "https://accounts.spotify.com/authorize",
-        }
+        },
     );
 
     const [disabled, setDisabled] = useState(false);
+    const [toastVisible, setToastVisible] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
 
     const { linkSpotify } = useAuth();
 
@@ -36,7 +40,8 @@ export default function Spotify() {
 
             linkSpotify(response.params.code).then((succeeded) => {
                 if (!succeeded) {
-                    alert("Houve um erro ao logar com o Spotify");
+                    setToastMessage("Houve um erro ao logar com o Spotify");
+                    setToastVisible(true);
                 }
 
                 setDisabled(false);
@@ -46,6 +51,12 @@ export default function Spotify() {
 
     return (
         <LinearGradient colors={["#000000", "#0a401f"]} style={{ flex: 1 }}>
+            <Toast
+                type="error"
+                message={toastMessage}
+                visible={toastVisible}
+                onHide={() => setToastVisible(false)}
+            />
             <SafeAreaView style={styles.container}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>harmony.</Text>

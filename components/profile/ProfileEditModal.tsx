@@ -34,18 +34,21 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
 
     const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (visible && profile) {
             setEditedProfile({ ...profile! });
             setSelectedImageUri(null);
+            setErrorMessage("");
         }
     }, [visible, profile]);
 
     const pickImage = async () => {
+        setErrorMessage("");
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-            alert("Permissão de acesso à galeria negada.");
+            setErrorMessage("Permissão de acesso à galeria negada.");
             return;
         }
 
@@ -64,6 +67,7 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
     const handleSaveChanges = async () => {
         if (!editedProfile) return;
         setIsSaving(true);
+        setErrorMessage("");
 
         let finalProfileData = { ...editedProfile };
 
@@ -72,7 +76,7 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
             if (newImageUrl) {
                 finalProfileData.profilePictureUrl = `${newImageUrl}?v=${Date.now()}`;
             } else {
-                alert("Erro ao atualizar a imagem de perfil.");
+                setErrorMessage("Erro ao atualizar a imagem de perfil.");
                 setIsSaving(false);
                 return;
             }
@@ -85,7 +89,7 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
         if (textFieldsUpdated) {
             onSave(finalProfileData);
         } else {
-            alert("Não foi possível atualizar os dados do perfil.");
+            setErrorMessage("Não foi possível atualizar os dados do perfil.");
         }
 
         setIsSaving(false);
@@ -155,6 +159,10 @@ const ProfileEditModal = ({ profile, visible, setVisible, onSave }: ProfileEditM
                             }
                         />
 
+                        {errorMessage !== "" && (
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                        )}
+
                         <HButton
                             style={{ width: "100%" }}
                             onPress={handleSaveChanges}
@@ -212,6 +220,14 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: color.regular,
     },
+    errorText: {
+        color: color.error,
+        fontFamily: "Nexa-Light",
+        fontSize: 14,
+        textAlign: "center",
+        marginTop: 10,
+    },
+
     profilePictureOverlay: {
         position: "absolute",
         width: 120,

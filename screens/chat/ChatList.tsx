@@ -1,11 +1,11 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { color } from "../../theme.json";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, StyleSheet, Text, Animated } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Animated } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import { ChatItem } from "../../components/chat";
 import { useChat } from "../../context/ChatContext";
-import { EmptyState } from "../../components/common";
+import { EmptyState, SkeletonLoader } from "../../components/common";
 
 export default function ChatList() {
     const { chats, getMyChats, loadingChats } = useChat();
@@ -44,7 +44,13 @@ export default function ChatList() {
                     </LinearGradient>
                 </Animated.View>
 
-                {chats.length === 0 && !loadingChats ? (
+                {loadingChats ? (
+                    <View style={styles.skeletonContainer}>
+                        {[0, 1, 2, 3].map((i) => (
+                            <SkeletonLoader key={i} style={styles.skeletonItem} />
+                        ))}
+                    </View>
+                ) : chats.length === 0 ? (
                     <EmptyState
                         icon="chatbox-outline"
                         title="Nenhuma conversa ainda"
@@ -119,5 +125,17 @@ const styles = StyleSheet.create({
 
     scrollContent: {
         paddingBottom: 20,
+    },
+
+    skeletonContainer: {
+        paddingHorizontal: 15,
+        paddingTop: 10,
+    },
+
+    skeletonItem: {
+        width: "100%",
+        height: 70,
+        borderRadius: 15,
+        marginBottom: 15,
     },
 });
