@@ -14,6 +14,9 @@ RUN dotnet publish Harmony.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
+# Install CA certificates for MongoDB Atlas SSL connection
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
 # Copy published app
 COPY --from=build /app/publish .
 
