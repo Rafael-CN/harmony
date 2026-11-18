@@ -2,19 +2,21 @@
 
 **Onde você se sintoniza com todos!**
 
-Harmony é um aplicativo mobile de rede social musical. Conecte sua conta do Spotify, descubra pessoas com gostos parecidos, explore novas músicas e converse em tempo real com quem compartilha o mesmo som que você.
+Harmony é uma rede social musical mobile integrada ao Spotify. Descubra pessoas com gostos musicais parecidos, ouça prévias, dê match por afinidade sonora e converse em tempo real.
+
+Este repositório reúne tanto o **aplicativo mobile (React Native + Expo)** na raiz quanto a **API REST + WebSocket (C# / ASP.NET Core 9 + SignalR + MongoDB)** em [`backend/`](./backend).
 
 ---
 
 ## Como funciona
 
-O Harmony utiliza seus dados do Spotify (músicas curtidas, artistas favoritos, gêneros) para criar um perfil musical único. A partir disso, o app recomenda outros usuários com compatibilidade musical e sugere novas músicas baseadas no seu gosto.
+O Harmony utiliza dados da conta do Spotify (músicas curtidas, artistas favoritos e gêneros) para montar o perfil musical de cada usuário, calcular compatibilidade e sugerir novas músicas e conexões.
 
 **Fluxo básico:**
 1. Crie sua conta e vincule seu Spotify
 2. Explore seu feed com curtidas recentes e recomendações
 3. Descubra pessoas e músicas com o sistema de swipe
-4. Deu match? Converse em tempo real pelo chat
+4. Deu match? Converse em tempo real pelo chat (SignalR)
 5. Personalize seu perfil com foto, bio e "tocando agora"
 
 ---
@@ -39,56 +41,70 @@ O Harmony utiliza seus dados do Spotify (músicas curtidas, artistas favoritos, 
 
 ---
 
-## Funcionalidades
+## Estrutura do repositório
 
-- **Feed personalizado** - Suas curtidas recentes e músicas recomendadas pelo Spotify
-- **Descoberta por swipe** - Deslize para curtir ou pular músicas e pessoas, estilo Tinder
-- **Compatibilidade musical** - Score de compatibilidade baseado nos seus artistas e gêneros
-- **Match e chat** - Quando dois usuários se curtem, um match é criado e o chat é liberado
-- **Chat em tempo real** - Mensagens instantâneas via WebSocket
-- **Preview de músicas** - Ouça um trecho de 30 segundos direto no app
-- **Busca de músicas** - Pesquise qualquer música do catálogo do Spotify
-- **Tocando agora** - Defina uma música como destaque no seu perfil
-- **Perfil completo** - Foto, bio, top artistas, top gêneros, estatísticas
-
----
-
-## Tecnologias
-
-### Mobile (este repositório)
-- **React Native** com **Expo** (SDK 53)
-- **TypeScript**
-- **React Navigation** para navegação
-- **React Context API** para gerenciamento de estado
-- **Axios** para requisições HTTP
-- **Microsoft SignalR** para WebSocket (chat em tempo real)
-- **Expo AV** para reprodução de áudio
-- **React Native Reanimated** para animações
-
-### Backend (repositório separado)
-- **C# / ASP.NET Core** Web API rodando na nuvem
-- **SignalR** para comunicação em tempo real
-- **Integração com Spotify Web API** para dados musicais
-- Hospedado no **Render.com**
+```text
+harmony/
+├── api/                 # Cliente HTTP (Axios) do aplicativo mobile
+├── assets/              # Ícones, imagens e screenshots do app
+├── components/          # Componentes reutilizáveis em React Native
+├── context/             # Estado global e autenticação (React Context)
+├── navigation/          # Fluxos de navegação (React Navigation)
+├── screens/             # Telas do aplicativo mobile
+├── types/               # Tipagens compartilhadas do frontend
+└── backend/             # API em C# / ASP.NET Core 9 + SignalR + MongoDB
+    ├── Controllers/     # Endpoints REST (Auth, Profile, Discovery, Music, Chat)
+    ├── Hubs/            # Hub SignalR para mensagens em tempo real (ChatHub)
+    ├── Services/        # Regras de negócio, compatibilidade, JWT e Spotify API
+    ├── Data/ & Models/  # Contexto e modelos do MongoDB
+    └── Dockerfile       # Build multi-stage para deploy em container
+```
 
 ---
 
-## Limitação importante - Spotify API
+## Stack
 
-O Harmony depende da API do Spotify para funcionar. Atualmente, o Spotify exige que aplicativos passem por um processo de **Extended Quota Mode** para serem disponibilizados publicamente, e os requisitos para esse processo torna inviável a passagem do Harmony para produção.
+### Mobile (raiz)
+- **React Native** com **Expo** (SDK 53) e **TypeScript**
+- **React Navigation** & **React Context API**
+- **Axios** para consumo da API REST
+- **Microsoft SignalR** (`@microsoft/signalr`) para chat em tempo real
+- **Expo AV** para reprodução de prévias de 30 segundos
+- **React Native Reanimated** para gestos e transições de swipe
 
-Por esse motivo:
-- **Não há APK disponível para download público** no momento
-- Futuramente, pretendo disponibilizar uma **conta de teste** para que qualquer pessoa possa experimentar o app sem precisar vincular o próprio Spotify
+### API ([`backend/`](./backend))
+- **C# / ASP.NET Core 9** Web API
+- **ASP.NET Core SignalR** para WebSockets em tempo real
+- **MongoDB** para persistência de usuários, perfis, matches e mensagens
+- **Autenticação JWT** (`Microsoft.AspNetCore.Authentication.JwtBearer`)
+- **Spotify Web API** (OAuth, top faixas/artistas, busca e recomendações)
+- **Docker** (container pronto para deploy)
 
 ---
 
-## Autor
+## Como executar localmente
 
-Desenvolvido como projeto acadêmico no **IFSul** (Instituto Federal Sul-rio-grandense).
+### 1. API (`backend/`)
+
+Configure as variáveis/user-secrets necessárias (`ConnectionStrings:MongoConnection`, `MongoDatabaseName`, `JwtSettings:Secret`, `SpotifySettings:ClientId`, `SpotifySettings:ClientSecret`, `SpotifySettings:RedirectUri`) e execute:
+
+```bash
+cd backend
+dotnet restore
+dotnet run
+```
+
+### 2. Aplicativo mobile (raiz)
+
+Defina `EXPO_PUBLIC_API_URL` apontando para a URL da API e inicie o Expo:
+
+```bash
+npm install
+npx expo start
+```
 
 ---
 
-## Licença
+## Observação sobre a API do Spotify
 
-Este projeto é apenas para fins educacionais e de demonstração.
+O Spotify exige aprovação em **Extended Quota Mode** para liberar acesso público irrestrito a contas externas, o que inviabiliza a distribuição pública de um APK conectado à API em produção. Por isso, o projeto é mantido para fins acadêmicos e de portfólio (desenvolvido originalmente no **IFSul — Instituto Federal Sul-rio-grandense**).
