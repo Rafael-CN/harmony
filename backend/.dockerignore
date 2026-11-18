@@ -1,0 +1,14 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/out
+**/.dockerignore
+**/Dockerfile
+**/*.md
+**/*.log
+**/*.sln
+**/appsettings.Development.json
